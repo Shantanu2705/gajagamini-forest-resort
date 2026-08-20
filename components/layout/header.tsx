@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/store/use-auth-store';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import {
   Bell,
   LogOut,
@@ -21,12 +21,12 @@ import {
 export const Header: React.FC<{ onOpenMobileSidebar?: () => void }> = ({ onOpenMobileSidebar }) => {
   const router = useRouter();
   const { user, logout } = useAuthStore();
-  const { notifications, markNotificationRead, settings } = useFleetStore();
+  const { settings } = useHotelStore();
   const [isDark, setIsDark] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -55,12 +55,13 @@ export const Header: React.FC<{ onOpenMobileSidebar?: () => void }> = ({ onOpenM
           <Menu className="h-5 w-5" />
         </Button>
         
-        <div className="hidden sm:flex items-center gap-2">
-          <span className="text-sm font-semibold text-muted-foreground">Company:</span>
+        <div className="flex items-center gap-2">
           {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Company Logo" className="h-7 w-auto max-w-[140px] object-contain inline-block mr-1" />
-          ) : null}
-          <span className="text-sm font-bold text-foreground">{settings?.companyName || 'Himalayan Vintage Holidays'}</span>
+            <img src={settings.logoUrl} alt="Company Logo" className="h-7 w-auto max-w-[140px] object-contain inline-block mr-1 mix-blend-multiply" />
+          ) : (
+            <img src="/logo.png" alt="Company Logo" className="h-7 w-auto max-w-[140px] object-contain inline-block mr-1 mix-blend-multiply" />
+          )}
+          <span className="text-sm font-bold text-foreground">{settings?.companyName || 'Gajagamini Forest Resort'}</span>
         </div>
       </div>
 

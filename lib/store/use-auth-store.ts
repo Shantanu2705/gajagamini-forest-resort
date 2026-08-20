@@ -21,8 +21,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   error: null,
   usersList: [
     { id: 'usr-1', name: 'Admin', email: 'admin@gmail.com', role: 'admin', status: 'active', createdAt: '2026-01-01' },
-    { id: 'usr-2', name: 'Tenzin Norgay (Manager)', email: 'manager@himalayan.co', role: 'manager', status: 'active', createdAt: '2026-01-15' },
-    { id: 'usr-3', name: 'Priya Sharma (Operator)', email: 'operator@himalayan.co', role: 'operator', status: 'active', createdAt: '2026-02-01' },
+    { id: 'usr-2', name: 'Tenzin Norgay (Manager)', email: 'manager@gajagamini.com', role: 'manager', status: 'active', createdAt: '2026-01-15' },
+    { id: 'usr-3', name: 'Priya Sharma (Operator)', email: 'operator@gajagamini.com', role: 'operator', status: 'active', createdAt: '2026-02-01' },
   ],
 
   initialize: () => {

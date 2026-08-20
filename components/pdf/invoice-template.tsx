@@ -32,19 +32,22 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
   const grandTotal = taxableAmount + totalGst + roundOff;
 
   return (
-    <div className="space-y-8 text-[12px] font-sans text-black">
+    <div className="relative text-[12px] font-sans text-black">
+      {/* Watermark */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-[0.05] overflow-hidden">
+        <img src={settings?.logoUrl || '/logo.png'} alt="Watermark" className="w-[60%] max-w-[500px] object-contain grayscale" />
+      </div>
 
-      {/* Header */}
+      <div className="relative z-10 space-y-8">
+        {/* Header */}
       {/* Header */}
       <div className="grid grid-cols-3 items-start border-b-2 border-primary pb-6 gap-4">
         {/* Left: Logo */}
-        <div className="flex justify-start">
+        <div className="flex-1">
           {settings?.logoUrl ? (
             <img src={settings.logoUrl} alt="Company Logo" className="h-28 w-auto max-w-[240px] object-contain mix-blend-multiply" />
           ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-900 shadow-sm text-white font-bold text-xl">
-              LOGO
-            </div>
+            <img src="/logo.png" alt="Company Logo" className="h-28 w-auto max-w-[240px] object-contain mix-blend-multiply" />
           )}
         </div>
 
@@ -59,14 +62,14 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
         {/* Right: Company Details */}
         <div className="flex flex-col items-end text-right">
           <h2 className="text-lg font-extrabold tracking-tight uppercase text-primary">
-            {settings?.companyName || 'Himalayan Vintage Holidays'}
+            {settings?.companyName || 'Gajagamini Forest Resort'}
           </h2>
           <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
             {settings?.address || 'MG Marg, Gangtok, Sikkim — 737101'}
           </p>
           <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || '+91 98300 12345'}</div>
-            <div>Email: {settings?.email || 'booking@himalayan.co'}</div>
+            <div>Email: {settings?.email || 'contact@gajagamini.com'}</div>
             {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
           </div>
         </div>
@@ -249,7 +252,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
             <span className="text-[10px] text-slate-400 opacity-50 block mt-4 font-normal lowercase italic">(signature & stamp)</span>
           </div>
           <div className="font-extrabold text-slate-800 uppercase text-[11px]">
-            For {settings?.companyName || 'Himalayan Vintage Holidays'}
+            For {settings?.companyName || 'Gajagamini Forest Resort'}
           </div>
           <div className="text-[10px] text-slate-500 mt-1">
             {invoice.signatoryName || settings?.adminFullName || 'Authorized Signatory'}
@@ -262,6 +265,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
           <img src={settings.footerLogoUrl} alt="Footer Details" className="h-28 w-auto object-contain max-w-full mix-blend-multiply" />
         </div>
       )}
+      </div>
     </div>
   );
 };

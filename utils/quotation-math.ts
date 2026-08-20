@@ -1,49 +1,45 @@
-import { QuotationCorporatePricing, QuotationTouristPricing } from '@/types';
+import { HotelQuotation } from '@/types';
 
 export interface QuotationCalculationResult {
-  baseAmount: number;
-  subtotal: number;
+  roomSubtotal: number;
+  foodSubtotal: number;
+  serviceSubtotal: number;
+  totalSubtotal: number;
+  discountAmount: number;
+  taxableAmount: number;
   gstAmount: number;
-  totalAmount: number;
+  grandTotal: number;
 }
 
-export const calculateCorporateQuotation = (
-  corp: QuotationCorporatePricing,
-  km: number,
-  hours: number,
-  gstPercent: number = 5,
-  additionalCharges: number = 0
+export const calculateHotelQuotation = (
+  q: Partial<HotelQuotation>
 ): QuotationCalculationResult => {
-  const kmCost = km * (corp.perKm || 0);
-  const hourCost = hours * (corp.perHour || 0);
-  const baseAmount = kmCost + hourCost;
-  const subtotal = baseAmount + (corp.driverAllowance || 0) + (corp.nightCharge || 0) + (corp.toll || 0) + (corp.parking || 0) + additionalCharges;
-  const gstAmount = Math.round((subtotal * gstPercent) / 100);
-  const totalAmount = subtotal + gstAmount;
+  const roomSubtotal = q.rooms?.reduce((acc, room) => acc + (room.subtotal || 0), 0) || 0;
+  const foodSubtotal = q.food?.reduce((acc, food) => acc + (food.subtotal || 0), 0) || 0;
+  const serviceSubtotal = q.services?.reduce((acc, service) => acc + (service.subtotal || 0), 0) || 0;
+
+  const totalSubtotal = roomSubtotal + foodSubtotal + serviceSubtotal;
+
+  let discountAmount = 0;
+  if (q.discountType === 'percentage') {
+    discountAmount = Math.round(totalSubtotal * (q.discountValue || 0) / 100);
+  } else {
+    discountAmount = q.discountValue || 0;
+  }
+
+  const taxableAmount = Math.max(0, totalSubtotal - discountAmount);
+  const gstPercent = q.gstPercent || 18;
+  const gstAmount = Math.round(taxableAmount * gstPercent / 100);
+  const grandTotal = taxableAmount + gstAmount;
 
   return {
-    baseAmount,
-    subtotal,
+    roomSubtotal,
+    foodSubtotal,
+    serviceSubtotal,
+    totalSubtotal,
+    discountAmount,
+    taxableAmount,
     gstAmount,
-    totalAmount,
-  };
-};
-
-export const calculateTouristQuotation = (
-  tourist: QuotationTouristPricing,
-  days: number,
-  gstPercent: number = 5,
-  additionalCharges: number = 0
-): QuotationCalculationResult => {
-  const baseAmount = (tourist.perDay || 0) * days;
-  const subtotal = baseAmount + (tourist.extraSightseeing || 0) + (tourist.permits || 0) + (tourist.toll || 0) + (tourist.parking || 0) + (tourist.extraVehicle || 0) + additionalCharges;
-  const gstAmount = Math.round((subtotal * gstPercent) / 100);
-  const totalAmount = subtotal + gstAmount;
-
-  return {
-    baseAmount,
-    subtotal,
-    gstAmount,
-    totalAmount,
+    grandTotal,
   };
 };

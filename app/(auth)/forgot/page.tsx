@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
                       <Input
                         id="email"
                         type="email"
-                        placeholder="admin@himalayan.co"
+                        placeholder="admin@gajagamini.com"
                         className="pl-9 h-10"
                         {...register('email')}
                       />

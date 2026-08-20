@@ -6,43 +6,19 @@ import {
   getDoc,
   setDoc,
   deleteDoc,
-  updateDoc,
 } from 'firebase/firestore';
 import {
-  initialVehicles,
-  initialDrivers,
-  initialCorporateClients,
-  initialEnquiries,
-  initialBookings,
-  initialQuotations,
-  initialRoutes,
-  initialDestinations,
-  initialPermits,
-  initialSightseeings,
-  initialInclusions,
-  initialExclusions,
-  initialNotifications,
-  initialSettings,
-  initialSerialCounters,
-} from '@/lib/firebase/seed-data';
-import {
-  Vehicle,
-  Driver,
-  CorporateClient,
+  Guest,
+  RoomType,
+  MealPlan,
+  AdditionalService,
+  HotelQuotation,
   Enquiry,
   Booking,
-  Quotation,
-  RouteMaster,
-  DestinationMaster,
-  PermitMaster,
-  SightseeingMaster,
-  InclusionMaster,
-  ExclusionMaster,
-  Notification,
-  CompanySettings,
-  SerialCounters,
   Invoice,
   Receipt,
+  CompanySettings,
+  SerialCounters,
 } from '@/types';
 
 // Helper to check if Firebase is configured with real credentials
@@ -59,7 +35,7 @@ const isFirebaseConfigured = (): boolean => {
 const getLocalData = <T>(key: string, fallback: T): T => {
   if (typeof window === 'undefined') return fallback;
   try {
-    const item = window.localStorage.getItem(`hfm-db-${key}`);
+    const item = window.localStorage.getItem(`gajagamini-db-${key}`);
     return item ? JSON.parse(item) : fallback;
   } catch {
     return fallback;
@@ -69,154 +45,199 @@ const getLocalData = <T>(key: string, fallback: T): T => {
 const setLocalData = <T>(key: string, data: T): void => {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(`hfm-db-${key}`, JSON.stringify(data));
+    window.localStorage.setItem(`gajagamini-db-${key}`, JSON.stringify(data));
   } catch (e) {
     console.error('Failed to save local DB data:', e);
   }
 };
 
-export class FleetDatabase {
-  // --- VEHICLES ---
-  static async getVehicles(): Promise<Vehicle[]> {
+export class HotelDatabase {
+  // --- GUESTS ---
+  static async getGuests(): Promise<Guest[]> {
     if (isFirebaseConfigured() && db) {
       try {
-        const snap = await getDocs(collection(db, 'vehicles'));
+        const snap = await getDocs(collection(db, 'guests'));
         if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Vehicle));
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Guest));
         }
       } catch (e) {
         console.warn('Firestore fetch failed, falling back to local DB:', e);
       }
     }
-    return getLocalData<Vehicle[]>('vehicles', initialVehicles);
+    return getLocalData<Guest[]>('guests', []);
   }
 
-  static async upsertVehicle(vehicle: Vehicle): Promise<Vehicle> {
+  static async upsertGuest(guest: Guest): Promise<Guest> {
+    const id = guest.id || `g-${Date.now()}`;
+    const newGuest = { ...guest, id };
     if (isFirebaseConfigured() && db) {
       try {
-        const id = vehicle.id || `v-${Date.now()}`;
-        const newVehicle = { ...vehicle, id };
-        await setDoc(doc(db, 'vehicles', id), newVehicle);
-        return newVehicle;
+        await setDoc(doc(db, 'guests', id), newGuest);
+        return newGuest;
       } catch (e) {
         console.warn('Firestore upsert failed, using local DB:', e);
       }
     }
-    const current = getLocalData<Vehicle[]>('vehicles', initialVehicles);
-    const id = vehicle.id || `v-${Date.now()}`;
-    const newVehicle = { ...vehicle, id };
+    const current = getLocalData<Guest[]>('guests', []);
     const index = current.findIndex((v) => v.id === id);
-    if (index >= 0) current[index] = newVehicle;
-    else current.unshift(newVehicle);
-    setLocalData('vehicles', current);
-    return newVehicle;
+    if (index >= 0) current[index] = newGuest;
+    else current.unshift(newGuest);
+    setLocalData('guests', current);
+    return newGuest;
   }
 
-  static async deleteVehicle(id: string): Promise<void> {
+  static async deleteGuest(id: string): Promise<void> {
     if (isFirebaseConfigured() && db) {
       try {
-        await deleteDoc(doc(db, 'vehicles', id));
+        await deleteDoc(doc(db, 'guests', id));
         return;
       } catch (e) {
         console.warn('Firestore delete failed, using local DB:', e);
       }
     }
-    const current = getLocalData<Vehicle[]>('vehicles', initialVehicles);
-    setLocalData('vehicles', current.filter((v) => v.id !== id));
+    const current = getLocalData<Guest[]>('guests', []);
+    setLocalData('guests', current.filter((v) => v.id !== id));
   }
 
-  // --- DRIVERS ---
-  static async getDrivers(): Promise<Driver[]> {
+  // --- ROOM TYPES ---
+  static async getRoomTypes(): Promise<RoomType[]> {
     if (isFirebaseConfigured() && db) {
       try {
-        const snap = await getDocs(collection(db, 'drivers'));
+        const snap = await getDocs(collection(db, 'roomTypes'));
         if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Driver));
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as RoomType));
         }
       } catch (e) {
         console.warn('Firestore fetch failed:', e);
       }
     }
-    return getLocalData<Driver[]>('drivers', initialDrivers);
+    return getLocalData<RoomType[]>('roomTypes', []);
   }
 
-  static async upsertDriver(driver: Driver): Promise<Driver> {
-    const id = driver.id || `d-${Date.now()}`;
-    const newDriver = { ...driver, id };
+  static async upsertRoomType(roomType: RoomType): Promise<RoomType> {
+    const id = roomType.id || `r-${Date.now()}`;
+    const newRoomType = { ...roomType, id };
     if (isFirebaseConfigured() && db) {
       try {
-        await setDoc(doc(db, 'drivers', id), newDriver);
-        return newDriver;
+        await setDoc(doc(db, 'roomTypes', id), newRoomType);
+        return newRoomType;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Driver[]>('drivers', initialDrivers);
+    const current = getLocalData<RoomType[]>('roomTypes', []);
     const index = current.findIndex((d) => d.id === id);
-    if (index >= 0) current[index] = newDriver;
-    else current.unshift(newDriver);
-    setLocalData('drivers', current);
-    return newDriver;
+    if (index >= 0) current[index] = newRoomType;
+    else current.unshift(newRoomType);
+    setLocalData('roomTypes', current);
+    return newRoomType;
   }
 
-  static async deleteDriver(id: string): Promise<void> {
+  static async deleteRoomType(id: string): Promise<void> {
     if (isFirebaseConfigured() && db) {
       try {
-        await deleteDoc(doc(db, 'drivers', id));
+        await deleteDoc(doc(db, 'roomTypes', id));
         return;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Driver[]>('drivers', initialDrivers);
-    setLocalData('drivers', current.filter((d) => d.id !== id));
+    const current = getLocalData<RoomType[]>('roomTypes', []);
+    setLocalData('roomTypes', current.filter((d) => d.id !== id));
   }
 
-  // --- CORPORATE CLIENTS ---
-  static async getCorporateClients(): Promise<CorporateClient[]> {
+  // --- MEAL PLANS ---
+  static async getMealPlans(): Promise<MealPlan[]> {
     if (isFirebaseConfigured() && db) {
       try {
-        const snap = await getDocs(collection(db, 'corporate_clients'));
+        const snap = await getDocs(collection(db, 'mealPlans'));
         if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as CorporateClient));
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as MealPlan));
         }
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    return getLocalData<CorporateClient[]>('corporate_clients', initialCorporateClients);
+    return getLocalData<MealPlan[]>('mealPlans', []);
   }
 
-  static async upsertCorporateClient(client: CorporateClient): Promise<CorporateClient> {
-    const id = client.id || `c-${Date.now()}`;
-    const newClient = { ...client, id };
+  static async upsertMealPlan(mealPlan: MealPlan): Promise<MealPlan> {
+    const id = mealPlan.id || `mp-${Date.now()}`;
+    const newMealPlan = { ...mealPlan, id };
     if (isFirebaseConfigured() && db) {
       try {
-        await setDoc(doc(db, 'corporate_clients', id), newClient);
-        return newClient;
+        await setDoc(doc(db, 'mealPlans', id), newMealPlan);
+        return newMealPlan;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<CorporateClient[]>('corporate_clients', initialCorporateClients);
+    const current = getLocalData<MealPlan[]>('mealPlans', []);
     const index = current.findIndex((c) => c.id === id);
-    if (index >= 0) current[index] = newClient;
-    else current.unshift(newClient);
-    setLocalData('corporate_clients', current);
-    return newClient;
+    if (index >= 0) current[index] = newMealPlan;
+    else current.unshift(newMealPlan);
+    setLocalData('mealPlans', current);
+    return newMealPlan;
   }
 
-  static async deleteCorporateClient(id: string): Promise<void> {
+  static async deleteMealPlan(id: string): Promise<void> {
     if (isFirebaseConfigured() && db) {
       try {
-        await deleteDoc(doc(db, 'corporate_clients', id));
+        await deleteDoc(doc(db, 'mealPlans', id));
         return;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<CorporateClient[]>('corporate_clients', initialCorporateClients);
-    setLocalData('corporate_clients', current.filter((c) => c.id !== id));
+    const current = getLocalData<MealPlan[]>('mealPlans', []);
+    setLocalData('mealPlans', current.filter((c) => c.id !== id));
+  }
+
+  // --- ADDITIONAL SERVICES ---
+  static async getAdditionalServices(): Promise<AdditionalService[]> {
+    if (isFirebaseConfigured() && db) {
+      try {
+        const snap = await getDocs(collection(db, 'additionalServices'));
+        if (!snap.empty) {
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as AdditionalService));
+        }
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    return getLocalData<AdditionalService[]>('additionalServices', []);
+  }
+
+  static async upsertAdditionalService(service: AdditionalService): Promise<AdditionalService> {
+    const id = service.id || `as-${Date.now()}`;
+    const newService = { ...service, id };
+    if (isFirebaseConfigured() && db) {
+      try {
+        await setDoc(doc(db, 'additionalServices', id), newService);
+        return newService;
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    const current = getLocalData<AdditionalService[]>('additionalServices', []);
+    const index = current.findIndex((e) => e.id === id);
+    if (index >= 0) current[index] = newService;
+    else current.unshift(newService);
+    setLocalData('additionalServices', current);
+    return newService;
+  }
+
+  static async deleteAdditionalService(id: string): Promise<void> {
+    if (isFirebaseConfigured() && db) {
+      try {
+        await deleteDoc(doc(db, 'additionalServices', id));
+        return;
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    const current = getLocalData<AdditionalService[]>('additionalServices', []);
+    setLocalData('additionalServices', current.filter((e) => e.id !== id));
   }
 
   // --- ENQUIRIES ---
@@ -231,7 +252,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    return getLocalData<Enquiry[]>('enquiries', initialEnquiries);
+    return getLocalData<Enquiry[]>('enquiries', []);
   }
 
   static async upsertEnquiry(enq: Enquiry): Promise<Enquiry> {
@@ -245,7 +266,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Enquiry[]>('enquiries', initialEnquiries);
+    const current = getLocalData<Enquiry[]>('enquiries', []);
     const index = current.findIndex((e) => e.id === id);
     if (index >= 0) current[index] = newEnq;
     else current.unshift(newEnq);
@@ -262,7 +283,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Enquiry[]>('enquiries', initialEnquiries);
+    const current = getLocalData<Enquiry[]>('enquiries', []);
     setLocalData('enquiries', current.filter((e) => e.id !== id));
   }
 
@@ -278,7 +299,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    return getLocalData<Booking[]>('bookings', initialBookings);
+    return getLocalData<Booking[]>('bookings', []);
   }
 
   static async upsertBooking(booking: Booking): Promise<Booking> {
@@ -292,7 +313,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Booking[]>('bookings', initialBookings);
+    const current = getLocalData<Booking[]>('bookings', []);
     const index = current.findIndex((b) => b.id === id);
     if (index >= 0) current[index] = newBooking;
     else current.unshift(newBooking);
@@ -309,55 +330,55 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Booking[]>('bookings', initialBookings);
+    const current = getLocalData<Booking[]>('bookings', []);
     setLocalData('bookings', current.filter((b) => b.id !== id));
   }
 
-  // --- QUOTATIONS ---
-  static async getQuotations(): Promise<Quotation[]> {
+  // --- HOTEL QUOTATIONS ---
+  static async getQuotations(): Promise<HotelQuotation[]> {
     if (isFirebaseConfigured() && db) {
       try {
-        const snap = await getDocs(collection(db, 'quotations'));
+        const snap = await getDocs(collection(db, 'hotelQuotations'));
         if (!snap.empty) {
-          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Quotation));
+          return snap.docs.map((d) => ({ id: d.id, ...d.data() } as HotelQuotation));
         }
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    return getLocalData<Quotation[]>('quotations', initialQuotations);
+    return getLocalData<HotelQuotation[]>('hotelQuotations', []);
   }
 
-  static async upsertQuotation(quotation: Quotation): Promise<Quotation> {
-    const id = quotation.id || `q-${Date.now()}`;
-    const newQuotation = { ...quotation, id };
+  static async upsertQuotation(quotation: HotelQuotation): Promise<HotelQuotation> {
+    const id = quotation.id || `hq-${Date.now()}`;
+    const newQuotation = { ...quotation, id, updatedAt: new Date().toISOString() };
     if (isFirebaseConfigured() && db) {
       try {
-        await setDoc(doc(db, 'quotations', id), newQuotation);
+        await setDoc(doc(db, 'hotelQuotations', id), newQuotation);
         return newQuotation;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Quotation[]>('quotations', initialQuotations);
-    const index = current.findIndex((q) => q.id === id);
+    const current = getLocalData<HotelQuotation[]>('hotelQuotations', []);
+    const index = current.findIndex((b) => b.id === id);
     if (index >= 0) current[index] = newQuotation;
     else current.unshift(newQuotation);
-    setLocalData('quotations', current);
+    setLocalData('hotelQuotations', current);
     return newQuotation;
   }
 
   static async deleteQuotation(id: string): Promise<void> {
     if (isFirebaseConfigured() && db) {
       try {
-        await deleteDoc(doc(db, 'quotations', id));
+        await deleteDoc(doc(db, 'hotelQuotations', id));
         return;
       } catch (e) {
         console.warn('Firestore error:', e);
       }
     }
-    const current = getLocalData<Quotation[]>('quotations', initialQuotations);
-    setLocalData('quotations', current.filter((q) => q.id !== id));
+    const current = getLocalData<HotelQuotation[]>('hotelQuotations', []);
+    setLocalData('hotelQuotations', current.filter((b) => b.id !== id));
   }
 
   // --- INVOICES & RECEIPTS ---
@@ -449,195 +470,7 @@ export class FleetDatabase {
     setLocalData('receipts', current.filter((r) => r.id !== id));
   }
 
-  // --- MASTERS & SETTINGS ---
-  static async getRoutes(): Promise<RouteMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'routes'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as RouteMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<RouteMaster[]>('routes', initialRoutes);
-  }
-  static async upsertRoute(route: RouteMaster): Promise<RouteMaster> {
-    const id = route.id || `r-${Date.now()}`;
-    const newRoute = { ...route, id };
-    if (isFirebaseConfigured() && db) {
-      try {
-        await setDoc(doc(db, 'routes', id), newRoute);
-        return newRoute;
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<RouteMaster[]>('routes', initialRoutes);
-    const idx = current.findIndex((r) => r.id === id);
-    if (idx >= 0) current[idx] = newRoute;
-    else current.unshift(newRoute);
-    setLocalData('routes', current);
-    return newRoute;
-  }
-  static async deleteRoute(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'routes', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<RouteMaster[]>('routes', initialRoutes);
-    setLocalData('routes', current.filter((r) => r.id !== id));
-  }
-
-  static async getDestinations(): Promise<DestinationMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'destinations'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as DestinationMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<DestinationMaster[]>('destinations', initialDestinations);
-  }
-  static async upsertDestination(dest: DestinationMaster): Promise<DestinationMaster> {
-    const id = dest.id || `dest-${Date.now()}`;
-    const newDest = { ...dest, id };
-    if (isFirebaseConfigured() && db) {
-      try { await setDoc(doc(db, 'destinations', id), newDest); return newDest; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<DestinationMaster[]>('destinations', initialDestinations);
-    const idx = current.findIndex((d) => d.id === id);
-    if (idx >= 0) current[idx] = newDest; else current.unshift(newDest);
-    setLocalData('destinations', current);
-    return newDest;
-  }
-  static async deleteDestination(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'destinations', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<DestinationMaster[]>('destinations', initialDestinations);
-    setLocalData('destinations', current.filter((d) => d.id !== id));
-  }
-
-  static async getPermits(): Promise<PermitMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'permits'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as PermitMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<PermitMaster[]>('permits', initialPermits);
-  }
-  static async upsertPermit(permit: PermitMaster): Promise<PermitMaster> {
-    const id = permit.id || `perm-${Date.now()}`;
-    const newPermit = { ...permit, id };
-    if (isFirebaseConfigured() && db) {
-      try { await setDoc(doc(db, 'permits', id), newPermit); return newPermit; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<PermitMaster[]>('permits', initialPermits);
-    const idx = current.findIndex((p) => p.id === id);
-    if (idx >= 0) current[idx] = newPermit; else current.unshift(newPermit);
-    setLocalData('permits', current);
-    return newPermit;
-  }
-  static async deletePermit(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'permits', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<PermitMaster[]>('permits', initialPermits);
-    setLocalData('permits', current.filter((p) => p.id !== id));
-  }
-
-  static async getSightseeings(): Promise<SightseeingMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'sightseeings'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as SightseeingMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<SightseeingMaster[]>('sightseeings', initialSightseeings);
-  }
-  static async upsertSightseeing(sight: SightseeingMaster): Promise<SightseeingMaster> {
-    const id = sight.id || `st-${Date.now()}`;
-    const newSight = { ...sight, id };
-    if (isFirebaseConfigured() && db) {
-      try { await setDoc(doc(db, 'sightseeings', id), newSight); return newSight; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<SightseeingMaster[]>('sightseeings', initialSightseeings);
-    const idx = current.findIndex((s) => s.id === id);
-    if (idx >= 0) current[idx] = newSight; else current.unshift(newSight);
-    setLocalData('sightseeings', current);
-    return newSight;
-  }
-  static async deleteSightseeing(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'sightseeings', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<SightseeingMaster[]>('sightseeings', initialSightseeings);
-    setLocalData('sightseeings', current.filter((s) => s.id !== id));
-  }
-
-  static async getInclusions(): Promise<InclusionMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'inclusions'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as InclusionMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<InclusionMaster[]>('inclusions', initialInclusions as any) as any;
-  }
-  static async upsertInclusion(inc: InclusionMaster): Promise<InclusionMaster> {
-    const id = inc.id || `inc-${Date.now()}`;
-    const newInc = { ...inc, id };
-    if (isFirebaseConfigured() && db) {
-      try { await setDoc(doc(db, 'inclusions', id), newInc); return newInc; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<InclusionMaster[]>('inclusions', initialInclusions as any);
-    const idx = current.findIndex((i) => i.id === id);
-    if (idx >= 0) current[idx] = newInc; else current.unshift(newInc);
-    setLocalData('inclusions', current);
-    return newInc;
-  }
-  static async deleteInclusion(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'inclusions', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<InclusionMaster[]>('inclusions', initialInclusions as any);
-    setLocalData('inclusions', current.filter((i) => i.id !== id));
-  }
-
-  static async getExclusions(): Promise<ExclusionMaster[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'exclusions'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as ExclusionMaster));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<ExclusionMaster[]>('exclusions', initialExclusions);
-  }
-  static async upsertExclusion(exc: ExclusionMaster): Promise<ExclusionMaster> {
-    const id = exc.id || `exc-${Date.now()}`;
-    const newExc = { ...exc, id };
-    if (isFirebaseConfigured() && db) {
-      try { await setDoc(doc(db, 'exclusions', id), newExc); return newExc; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<ExclusionMaster[]>('exclusions', initialExclusions);
-    const idx = current.findIndex((e) => e.id === id);
-    if (idx >= 0) current[idx] = newExc; else current.unshift(newExc);
-    setLocalData('exclusions', current);
-    return newExc;
-  }
-  static async deleteExclusion(id: string): Promise<void> {
-    if (isFirebaseConfigured() && db) {
-      try { await deleteDoc(doc(db, 'exclusions', id)); return; } catch (e) { console.warn('Firestore error:', e); }
-    }
-    const current = getLocalData<ExclusionMaster[]>('exclusions', initialExclusions);
-    setLocalData('exclusions', current.filter((e) => e.id !== id));
-  }
-
-  static async getNotifications(): Promise<Notification[]> {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const snap = await getDocs(collection(db, 'notifications'));
-        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Notification));
-      } catch (e) { console.warn('Firestore error:', e); }
-    }
-    return getLocalData<Notification[]>('notifications', initialNotifications);
-  }
-
+  // --- SETTINGS ---
   static async getSettings(): Promise<CompanySettings> {
     if (isFirebaseConfigured() && db) {
       try {
@@ -647,7 +480,7 @@ export class FleetDatabase {
         console.warn('Firestore error:', e);
       }
     }
-    return getLocalData<CompanySettings>('settings', initialSettings);
+    return getLocalData<CompanySettings>('settings', {});
   }
 
   static async updateSettings(settings: Partial<CompanySettings>): Promise<CompanySettings> {
@@ -664,14 +497,19 @@ export class FleetDatabase {
     return updated;
   }
 
-  static async nextSerial(type: 'transport' | 'package' | 'invoice' | 'receipt'): Promise<string> {
-    const current = getLocalData<SerialCounters>('serialCounters', initialSerialCounters);
+  static async nextSerial(type: 'hotelQuotation' | 'booking' | 'invoice' | 'receipt'): Promise<string> {
+    const current = getLocalData<SerialCounters>('serialCounters', {
+      hotelQuotation: { year: 2024, next: 1 },
+      booking: { year: 2024, next: 1 },
+      invoice: { year: 2024, next: 1 },
+      receipt: { year: 2024, next: 1 },
+    });
     const year = new Date().getFullYear();
     const item = current[type] || { year, next: 1 };
     const validItem = item.year === year ? item : { year, next: 1 };
     
-    let prefix = 'TR';
-    if (type === 'package') prefix = 'PKG';
+    let prefix = 'HQ';
+    if (type === 'booking') prefix = 'BK';
     else if (type === 'invoice') prefix = 'INV';
     else if (type === 'receipt') prefix = 'REC';
 
@@ -680,30 +518,7 @@ export class FleetDatabase {
     setLocalData('serialCounters', current);
     return serialStr;
   }
-
-  static async seedDatabase(): Promise<{ success: boolean; count: number; message: string }> {
-    if (!isFirebaseConfigured() || !db) {
-      return { success: false, count: 0, message: 'Firebase is not configured with live credentials.' };
-    }
-    try {
-      let count = 0;
-      for (const v of initialVehicles) { await setDoc(doc(db, 'vehicles', v.id), v); count++; }
-      for (const d of initialDrivers) { await setDoc(doc(db, 'drivers', d.id), d); count++; }
-      for (const c of initialCorporateClients) { await setDoc(doc(db, 'corporate', c.id), c); count++; }
-      for (const e of initialEnquiries) { await setDoc(doc(db, 'enquiries', e.id), e); count++; }
-      for (const b of initialBookings) { await setDoc(doc(db, 'bookings', b.id), b); count++; }
-      for (const q of initialQuotations) { await setDoc(doc(db, 'quotations', q.id), q); count++; }
-      for (const r of initialRoutes) { await setDoc(doc(db, 'routes', r.id), r); count++; }
-      for (const dest of initialDestinations) { await setDoc(doc(db, 'destinations', dest.id), dest); count++; }
-      for (const p of initialPermits) { await setDoc(doc(db, 'permits', p.id), p); count++; }
-      for (const s of initialSightseeings) { await setDoc(doc(db, 'sightseeings', s.id), s); count++; }
-      for (const inc of initialInclusions) { await setDoc(doc(db, 'inclusions', inc.id), inc); count++; }
-      for (const exc of initialExclusions) { await setDoc(doc(db, 'exclusions', exc.id), exc); count++; }
-      await setDoc(doc(db, 'settings', 'company'), initialSettings); count++;
-      return { success: true, count, message: `Successfully seeded ${count} documents to live Firestore database!` };
-    } catch (e: any) {
-      console.error('Seeding failed:', e);
-      return { success: false, count: 0, message: e.message || 'Error occurred during database seeding.' };
-    }
-  }
 }
+
+// Keep export of FleetDatabase for compatibility while renaming
+export const FleetDatabase = HotelDatabase;

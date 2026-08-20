@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, Suspense, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { CompanySettings } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,14 +11,14 @@ import { updateCredentials } from '@/lib/firebase/auth';
 import { Upload, Trash2 } from 'lucide-react';
 
 function SettingsContent() {
-  const { settings, updateSettings } = useFleetStore();
+  const { settings, updateSettings } = useHotelStore();
   const [loading, setLoading] = useState(false);
   
   // Settings State
-  const [companyName, setCompanyName] = useState('Himalayan Vintage Holiday');
-  const [supportEmail, setSupportEmail] = useState('bookings@himalayantaxi.com');
-  const [whatsappNumber, setWhatsappNumber] = useState('919800011111');
-  const [invoicePrefix, setInvoicePrefix] = useState('HVH');
+  const [companyName, setCompanyName] = useState('Gajagamini Forest Resort');
+  const [supportEmail, setSupportEmail] = useState('gajagaminilataguri@gmail.com');
+  const [whatsappNumber, setWhatsappNumber] = useState('+91 9830712000');
+  const [invoicePrefix, setInvoicePrefix] = useState('GFR');
   const [gstPercent, setGstPercent] = useState('5');
   
   // Logos
@@ -30,12 +30,12 @@ function SettingsContent() {
   const [terms, setTerms] = useState('');
   
   // Bank
-  const [bankName, setBankName] = useState('HDFC Bank');
-  const [accountName, setAccountName] = useState('Himalayan Vintage Holidays');
-  const [accountNumber, setAccountNumber] = useState('50200012345678');
-  const [ifsc, setIfsc] = useState('HDFC0001234');
-  const [branch, setBranch] = useState('Siliguri Main');
-  const [upiId, setUpiId] = useState('himalayantaxi@hdfc');
+  const [bankName, setBankName] = useState('State Bank of India');
+  const [accountName, setAccountName] = useState('Gajagamini Forest Resort');
+  const [accountNumber, setAccountNumber] = useState('30000000000');
+  const [ifsc, setIfsc] = useState('SBIN0000000');
+  const [branch, setBranch] = useState('Lataguri');
+  const [upiId, setUpiId] = useState('gajagamini@sbi');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   
   // Appearance
@@ -43,7 +43,7 @@ function SettingsContent() {
 
   // Credentials
   const [adminFullName, setAdminFullName] = useState('Rajiv Pradhan');
-  const [adminEmail, setAdminEmail] = useState('admin@himalayan.co');
+  const [adminEmail, setAdminEmail] = useState('admin@gajagamini.com');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -201,7 +201,7 @@ function SettingsContent() {
         {/* 2. PDF logos */}
         <div className="bg-white rounded-3xl p-8 shadow-sm">
           <h2 className="text-[15px] font-bold text-gray-900 mb-1">PDF logos</h2>
-          <p className="text-[13px] text-gray-500 mb-6">Header logo appears at the top of every quotation & invoice. Footer logo appears at the bottom. Leave blank to use the default Himalayan logos.</p>
+          <p className="text-[13px] text-gray-500 mb-6">Header logo appears at the top of every quotation & invoice. Footer logo appears at the bottom. Leave blank to use the default Gajagamini logos.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
               <Label className="text-[12px] text-gray-700 font-medium">Header logo (top of PDF)</Label>

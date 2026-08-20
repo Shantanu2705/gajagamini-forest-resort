@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { Invoice, InvoiceItem, PaymentStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,7 +31,7 @@ function InvoiceEditorPageInner() {
   const id = params.id as string;
   const isNew = id === 'new';
 
-  const { invoices, addInvoice, updateInvoice, deleteInvoice, quotations, bookings, settings } = useFleetStore();
+  const { invoices, addInvoice, updateInvoice, deleteInvoice, hotelQuotations, bookings, settings } = useHotelStore();
   const quotationId = searchParams.get('quotationId');
   const bookingId = searchParams.get('bookingId');
   
@@ -46,7 +46,6 @@ function InvoiceEditorPageInner() {
     date: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
     paymentTerms: 'Due on Receipt',
-    travellers: '',
     clientName: '',
     clientGstin: '',
     clientState: 'West Bengal',
@@ -57,18 +56,17 @@ function InvoiceEditorPageInner() {
       dateFrom: '',
       dateTo: '',
       serviceDetails: '',
-      vehicles: '',
       hsnSac: '998552',
       quantity: 1,
       rate: 0,
       discountPercent: 0,
-      gstPercent: 5,
+      gstPercent: 12,
     }],
     disclaimerNote: '',
     roundOff: 0,
     advanceReceived: 0,
-    placeOfIssue: 'Bagdogra',
-    signatoryName: 'Siraj Bhowmick',
+    placeOfIssue: 'Hotel Reception',
+    signatoryName: 'Admin',
     extraNote: ''
   });
 
@@ -77,22 +75,21 @@ function InvoiceEditorPageInner() {
       const existing = invoices.find(i => i.id === id);
       if (existing) setInvoice(existing);
     } else if (quotationId) {
-      const q = quotations.find(x => x.id === quotationId);
+      const q = hotelQuotations.find(x => x.id === quotationId);
       if (q) {
         setInvoice(prev => ({
           ...prev,
-          clientName: q.clientName || q.customerName || '',
-          clientPhone: q.clientPhone || q.mobile || '',
+          clientName: q.guestName || '',
+          clientPhone: q.guestMobile || '',
           clientState: 'West Bengal',
           items: [{
             id: Math.random().toString(36).substring(2, 9),
-            serviceDetails: `Tour Package For\n${q.clientName || q.customerName}\n${q.destination}`,
-            vehicles: q.vehicle || '',
+            serviceDetails: `Hotel Stay For\n${q.guestName}`,
             hsnSac: '998552',
             quantity: 1,
-            rate: q.baseAmount || q.totalAmount || 0,
+            rate: q.grandTotal || 0,
             discountPercent: 0,
-            gstPercent: 5,
+            gstPercent: 12,
           }],
         }));
       }
@@ -105,18 +102,17 @@ function InvoiceEditorPageInner() {
           advanceReceived: b.advance || 0,
           items: [{
             id: Math.random().toString(36).substring(2, 9),
-            serviceDetails: `Vehicle Rental For\n${b.clientName}\n${b.pickup} to ${b.destination}`,
-            vehicles: b.vehicle || '',
+            serviceDetails: `Room Booking For\n${b.clientName}`,
             hsnSac: '998552',
             quantity: 1,
             rate: b.amount || 0,
             discountPercent: 0,
-            gstPercent: 5,
+            gstPercent: 12,
           }],
         }));
       }
     }
-  }, [isNew, id, invoices, quotationId, bookingId, quotations, bookings]);
+  }, [isNew, id, invoices, quotationId, bookingId, hotelQuotations, bookings]);
 
   // Handle auto supply type based on state
   useEffect(() => {
@@ -144,7 +140,7 @@ function InvoiceEditorPageInner() {
       quantity: 1,
       rate: 0,
       discountPercent: 0,
-      gstPercent: 5,
+      gstPercent: 12,
     }]);
   };
 
@@ -295,10 +291,6 @@ function InvoiceEditorPageInner() {
                   <Label className="text-[12px] text-gray-500 font-medium">Payment terms</Label>
                   <Input value={invoice.paymentTerms || ''} onChange={e => handleUpdate('paymentTerms', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] text-gray-500 font-medium">Travellers (optional)</Label>
-                  <Input value={invoice.travellers || ''} onChange={e => handleUpdate('travellers', e.target.value)} placeholder="e.g. 2 Adults, 1 Child" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                </div>
               </div>
             </Card>
 
@@ -381,10 +373,6 @@ function InvoiceEditorPageInner() {
                       <div className="space-y-1.5">
                         <Label className="text-[11px] text-gray-500">Service details (one per line)</Label>
                         <Textarea value={item.serviceDetails || ''} onChange={e => handleLineUpdate(idx, 'serviceDetails', e.target.value)} className="min-h-[80px] rounded-lg bg-white border-gray-200 text-[13px] resize-none leading-relaxed" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[11px] text-gray-500">Vehicle No(s) (comma or newline separated)</Label>
-                        <Textarea value={item.vehicles || ''} onChange={e => handleLineUpdate(idx, 'vehicles', e.target.value)} className="min-h-[50px] rounded-lg bg-white border-gray-200 text-[13px] resize-none" />
                       </div>
                     </div>
                     

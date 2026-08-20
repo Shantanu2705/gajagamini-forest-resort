@@ -4,13 +4,13 @@ import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
 import { useAuthStore } from '@/lib/store/use-auth-store';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { Bus } from 'lucide-react';
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const { user, isLoading: authLoading, initialize: initAuth } = useAuthStore();
-  const { fetchAll, isLoading: dataLoading } = useFleetStore();
+  const { fetchAll, isLoading: dataLoading } = useHotelStore();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -35,7 +35,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
             <img src="/logo-icon.svg" alt="Logo" className="h-7 w-7 object-contain" />
           </div>
           <span className="text-sm font-semibold text-muted-foreground animate-pulse">
-            Loading Himalayan Fleet Enterprise...
+            Loading Gajagamini Forest Resort Portal...
           </span>
         </div>
       </div>

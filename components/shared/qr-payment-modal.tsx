@@ -9,7 +9,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { formatCurrency } from '@/utils/formatters';
 import { QrCode, Copy, Check, Building2, Smartphone } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export const QrPaymentModal: React.FC<QrPaymentModalProps> = ({
   referenceNo,
   clientName,
 }) => {
-  const settings = useFleetStore((s) => s.settings);
+  const settings = useHotelStore((s) => s.settings);
   const [copiedField, setCopiedField] = React.useState<string | null>(null);
 
   const copyToClipboard = (text: string, field: string) => {
@@ -37,9 +37,9 @@ export const QrPaymentModal: React.FC<QrPaymentModalProps> = ({
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const upiId = settings?.upiId || 'himalayantaxi@hdfc';
+  const upiId = settings?.upiId || 'gajagamini@hdfc';
   const bankName = settings?.bankName || 'HDFC Bank';
-  const accountName = settings?.accountName || 'Himalayan Vintage Holidays';
+  const accountName = settings?.accountName || 'Gajagamini Forest Resort';
   const accountNumber = settings?.accountNumber || '50200012345678';
   const ifsc = settings?.ifsc || 'HDFC0001234';
 
@@ -57,7 +57,7 @@ export const QrPaymentModal: React.FC<QrPaymentModalProps> = ({
             )}
           </div>
           <DialogDescription>
-            Direct UPI & Bank Transfer Payment for {clientName || settings?.companyName || 'Himalayan Fleet'}
+            Direct UPI & Bank Transfer Payment for {clientName || settings?.companyName || 'Gajagamini Resort'}
           </DialogDescription>
         </DialogHeader>
 
@@ -81,7 +81,7 @@ export const QrPaymentModal: React.FC<QrPaymentModalProps> = ({
             ) : (
               <div className="flex flex-col items-center justify-center text-center p-4">
                 <QrCode className="h-24 w-24 text-primary/60 animate-pulse mb-2" />
-                <span className="text-xs font-semibold text-primary">HIMALAYAN TAXI UPI QR</span>
+                <span className="text-xs font-semibold text-primary">HOTEL UPI QR</span>
                 <span className="text-[10px] text-muted-foreground mt-1">Scan via GPay, PhonePe, Paytm, or BHIM</span>
               </div>
             )}

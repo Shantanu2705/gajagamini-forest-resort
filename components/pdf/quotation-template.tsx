@@ -1,20 +1,19 @@
 import React from 'react';
-import { CompanySettings } from '@/types';
-import { formatCurrency, formatDate } from '@/utils/formatters';
+import { CompanySettings, HotelQuotation, HotelQuotationRoomItem, HotelQuotationFoodItem, HotelQuotationServiceItem } from '@/types';
+import { formatDate } from '@/utils/formatters';
 
 interface QuotationPdfTemplateProps {
-  quotation: any; 
+  quotation: HotelQuotation;
   settings: CompanySettings | null;
 }
 
-// Simple Indian numbering system number-to-words converter
 function numberToWords(num: number): string {
   if (num === 0) return 'Zero';
   
   const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
   
-  const numStr = num.toString();
+  const numStr = Math.floor(num).toString();
   if (numStr.length > 9) return numStr; 
 
   const n = ('000000000' + numStr).slice(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
@@ -31,154 +30,233 @@ function numberToWords(num: number): string {
 }
 
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
-  const companyName = settings?.companyName || 'Himalayan Vintage Holidays';
-  const companyAddress = settings?.address || 'Bagdogra, West Bengal, India';
-  const companyContact = settings?.phone || '+91 98515 44861';
-  const companyEmail = settings?.email || 'query@himalayantaxi.com';
-  const gstin = settings?.gstin || '19AQWPB8639C2ZE';
-
-  const cabSummary = quotation.vehicles?.length > 0 
-    ? quotation.vehicles.map((v: any) => `${v.qty || 1} ${v.vehicle}`).join(', ')
-    : 'Not Specified';
+  const companyName = settings?.companyName || 'Gajagamini Forest Resort';
+  const companyAddress = settings?.address || 'Opposit Bichabhanga Range Office, NH 31, Lataguri, Nimna Tandu Forest, WB: 735219';
+  const companyContact = settings?.phone || '+91 9830712000';
+  const companyEmail = settings?.email || 'gajagaminilataguri@gmail.com';
+  const gstin = settings?.gstin || 'XXXXXXXXXXXXXXX';
+  const website = settings?.website || 'www.gajagaminiresort.com';
 
   return (
-    <div 
-      className="space-y-4 text-[13px] leading-relaxed text-black break-words" 
-      style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive' }}
-    >
-      {/* Header */}
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex-shrink-0">
+    <div className="relative text-[14px] leading-relaxed text-gray-900 font-sans break-words bg-white">
+      {/* Watermark */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-[0.05] overflow-hidden">
+        <img src={settings?.logoUrl || '/logo.png'} alt="Watermark" className="w-[60%] max-w-[500px] object-contain grayscale" />
+      </div>
+
+      <div className="relative z-10 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-start border-b-2 border-primary pb-4 mb-6">
+        {/* Left: Logo */}
+        <div className="flex-1">
           {settings?.logoUrl ? (
-            <img src={settings.logoUrl} alt="Company Logo" className="h-20 w-auto object-contain mix-blend-multiply" />
+            <img src={settings.logoUrl} alt="Company Logo" className="h-24 w-auto object-contain mix-blend-multiply" />
           ) : (
-            <div className="h-16 w-32 border-2 border-black flex items-center justify-center font-bold">
-              LOGO
-            </div>
+            <img src="/logo.png" alt="Company Logo" className="h-24 w-auto object-contain mix-blend-multiply" />
           )}
         </div>
         
         <div className="text-right">
-          <h2 className="text-xl font-bold text-[#0c2f5d] m-0">{companyName}</h2>
-          <div className="font-bold text-sm text-[#0c2f5d]">{companyAddress}</div>
-          <div className="font-bold text-sm text-[#0c2f5d]">Contact : {companyContact}, {companyEmail}</div>
-          <div className="font-bold text-sm text-[#0c2f5d]">GST IN : {gstin}</div>
+          <h2 className="text-2xl font-bold text-primary m-0 uppercase tracking-wider">{companyName}</h2>
+          <div className="text-sm mt-1">{companyAddress}</div>
+          <div className="text-sm">Phone: {companyContact} | Email: {companyEmail}</div>
+          <div className="text-sm">Web: {website}</div>
+          {settings?.gstin && <div className="text-sm font-semibold">GSTIN: {gstin}</div>}
+        </div>
+      </div>
+
+      <div className="text-center bg-gray-100 py-2 border-y border-gray-300 mb-6">
+        <h3 className="text-lg font-bold uppercase tracking-widest text-primary m-0">Quotation</h3>
+      </div>
+
+      {/* Info Grid */}
+      <div className="grid grid-cols-2 gap-8 mb-6 text-sm">
+        <div className="space-y-1">
+          <div className="font-bold text-primary border-b pb-1 mb-2">Guest Details</div>
+          <div><span className="font-semibold">Name:</span> {quotation.guestName}</div>
+          <div><span className="font-semibold">Mobile:</span> {quotation.guestMobile}</div>
+          {quotation.guestEmail && <div><span className="font-semibold">Email:</span> {quotation.guestEmail}</div>}
+          {quotation.companyName && <div><span className="font-semibold">Company:</span> {quotation.companyName}</div>}
+        </div>
+        <div className="space-y-1">
+          <div className="font-bold text-primary border-b pb-1 mb-2">Reservation Details</div>
+          <div><span className="font-semibold">Quotation No:</span> {quotation.quotationNo}</div>
+          <div><span className="font-semibold">Date:</span> {formatDate(quotation.createdAt)}</div>
+          <div><span className="font-semibold">Check In:</span> {formatDate(quotation.checkIn)}</div>
+          <div><span className="font-semibold">Check Out:</span> {formatDate(quotation.checkOut)}</div>
+          <div>
+            <span className="font-semibold">Guests:</span> {quotation.adults} Adults, {quotation.children} Children
+            {quotation.infants ? `, ${quotation.infants} Infants` : ''} 
+            ({quotation.nights} Nights)
+          </div>
         </div>
       </div>
 
       {/* Intro Text */}
-      <div className="text-justify font-bold text-[#7a1818] mb-4">
-        Dear {quotation.clientName || quotation.customerName || 'Client'}, with Ref. form telcom / Email / Whats app – We are providing you the cab 
-        service for {quotation.packageDuration || 'tour'} (Not on Disposal) – Itinerary & details are given below along 
-        with terms & condition.
+      <div className="text-justify mb-6">
+        Dear <strong>{quotation.guestName}</strong>,<br/>
+        Greetings from Gajagamini Forest Resort! Thank you for choosing us for your upcoming stay. 
+        Please find below the detailed quotation for your requirements.
       </div>
 
-      {/* Date */}
-      <div className="mb-4">
-        <span className="bg-yellow-300 font-bold px-1">
-          Date: {formatDate(quotation.date || quotation.createdAt || new Date().toISOString())} - {quotation.clientPhone || quotation.mobile || 'Contact Not Provided'}
-        </span>
-      </div>
-
-      {/* Day-Wise Itinerary */}
-      {quotation.itinerary && quotation.itinerary.length > 0 && (
-        <div className="space-y-4">
-          {quotation.itinerary.map((item: any, idx: number) => (
-            <div key={idx}>
-              <div className="inline-block bg-yellow-300 font-bold mb-1 px-1">
-                Day {String(idx + 1).padStart(2, '0')}: {item.title || `Day ${idx + 1}`}
-              </div>
-              <div className="text-justify text-[#0c2f5d]">
-                {item.desc || item.description}
-              </div>
-            </div>
-          ))}
+      {/* Rooms Table */}
+      {quotation.rooms && quotation.rooms.length > 0 && (
+        <div className="mb-6">
+          <div className="font-bold text-primary mb-2 text-base">Accommodation</div>
+          <table className="w-full text-sm border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-left">Room Type</th>
+                <th className="border border-gray-300 p-2 text-center">Rooms</th>
+                <th className="border border-gray-300 p-2 text-center">Nights</th>
+                <th className="border border-gray-300 p-2 text-right">Rate/Night</th>
+                <th className="border border-gray-300 p-2 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotation.rooms.map((room, idx) => (
+                <tr key={idx}>
+                  <td className="border border-gray-300 p-2">{room.roomName}</td>
+                  <td className="border border-gray-300 p-2 text-center">{room.numberOfRooms}</td>
+                  <td className="border border-gray-300 p-2 text-center">{room.nights}</td>
+                  <td className="border border-gray-300 p-2 text-right">₹{room.ratePerNight.toLocaleString()}</td>
+                  <td className="border border-gray-300 p-2 text-right">₹{room.subtotal.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Package Summary */}
-      <div className="mt-6 mb-4 space-y-1">
-        <div>
-          <span className="bg-yellow-300 font-bold px-1">
-            Pax: {quotation.passengers || '1'} Only (Including Adults / Children / Kids)
-          </span>
-        </div>
-        <div>
-          <span className="bg-yellow-300 font-bold px-1">
-            Cab: {cabSummary}
-          </span>
-        </div>
-        <div>
-          <span className="bg-yellow-300 font-bold px-1">
-            Status: Reserved
-          </span>
-        </div>
-        <div>
-          <span className="bg-yellow-300 font-bold px-1">
-            Costing: Rs.{quotation.grandTotal || 0} ({numberToWords(quotation.grandTotal || 0)})
-          </span>
-        </div>
-      </div>
-
-      {/* Package Includes & Excludes */}
-      {(quotation.inclusions?.length > 0 || quotation.exclusions?.length > 0) && (
-        <div className="space-y-4 mt-6 text-[#0c2f5d]">
-          {quotation.inclusions?.length > 0 && (
-            <div>
-              <div className="font-bold underline mb-1">Package includes:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {quotation.inclusions.map((inc: string, i: number) => (
-                  <li key={i}>{inc}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          
-          {quotation.exclusions?.length > 0 && (
-            <div>
-              <div className="font-bold underline mb-1">Package excludes:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {quotation.exclusions.map((exc: string, i: number) => (
-                  <li key={i}>{exc}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* Food Table */}
+      {quotation.food && quotation.food.length > 0 && (
+        <div className="mb-6">
+          <div className="font-bold text-primary mb-2 text-base">Meal Plans</div>
+          <table className="w-full text-sm border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-left">Plan Name</th>
+                <th className="border border-gray-300 p-2 text-center">Adults</th>
+                <th className="border border-gray-300 p-2 text-center">Children</th>
+                <th className="border border-gray-300 p-2 text-center">Days</th>
+                <th className="border border-gray-300 p-2 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotation.food.map((f, idx) => (
+                <tr key={idx}>
+                  <td className="border border-gray-300 p-2">{f.mealPlanName}</td>
+                  <td className="border border-gray-300 p-2 text-center">{f.adults} @ ₹{f.adultRate}</td>
+                  <td className="border border-gray-300 p-2 text-center">{f.children} @ ₹{f.childRate}</td>
+                  <td className="border border-gray-300 p-2 text-center">{f.days}</td>
+                  <td className="border border-gray-300 p-2 text-right">₹{f.subtotal.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
-      {/* Terms and Conditions / Remarks */}
-      {(quotation.terms || quotation.remarks) && (
-        <div className="space-y-4 mt-6 text-[#0c2f5d] break-before-auto">
-          {quotation.terms && (
-            <div>
-              <div className="font-bold underline mb-1">Terms & Condition:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {quotation.terms.split('\n').filter((t: string) => t.trim() !== '').map((term: string, idx: number) => (
-                  <li key={idx} className="text-justify">{term.trim().replace(/^[-•]\s*/, '')}</li>
-                ))}
-              </ul>
+      {/* Services Table */}
+      {quotation.services && quotation.services.length > 0 && (
+        <div className="mb-6">
+          <div className="font-bold text-primary mb-2 text-base">Additional Services</div>
+          <table className="w-full text-sm border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 p-2 text-left">Service</th>
+                <th className="border border-gray-300 p-2 text-center">Qty</th>
+                <th className="border border-gray-300 p-2 text-right">Unit Price</th>
+                <th className="border border-gray-300 p-2 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quotation.services.map((s, idx) => (
+                <tr key={idx}>
+                  <td className="border border-gray-300 p-2">{s.serviceName}</td>
+                  <td className="border border-gray-300 p-2 text-center">{s.quantity}</td>
+                  <td className="border border-gray-300 p-2 text-right">₹{s.unitPrice.toLocaleString()}</td>
+                  <td className="border border-gray-300 p-2 text-right">₹{s.subtotal.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pricing Summary */}
+      <div className="flex justify-end mb-8 mt-6">
+        <div className="w-1/2">
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="p-2 font-semibold">Subtotal</td>
+                <td className="p-2 text-right">₹{quotation.totalSubtotal.toLocaleString()}</td>
+              </tr>
+              {quotation.discountAmount > 0 && (
+                <tr className="text-red-600">
+                  <td className="p-2 font-semibold">Discount</td>
+                  <td className="p-2 text-right">- ₹{quotation.discountAmount.toLocaleString()}</td>
+                </tr>
+              )}
+              {quotation.gstAmount > 0 && (
+                <tr>
+                  <td className="p-2 font-semibold">GST ({quotation.gstPercent}%)</td>
+                  <td className="p-2 text-right">+ ₹{quotation.gstAmount.toLocaleString()}</td>
+                </tr>
+              )}
+              <tr className="text-base border-t-2 border-gray-400 bg-gray-50">
+                <td className="p-2 font-bold text-primary">Grand Total</td>
+                <td className="p-2 text-right font-bold text-primary">₹{quotation.grandTotal.toLocaleString()}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="mt-2 text-right text-xs italic text-gray-500">
+            (Amount in words: Rupees {numberToWords(quotation.grandTotal)} Only)
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-8 mb-8">
+        <div className="bg-primary/5 p-4 rounded-md border border-primary/20">
+          <div className="font-bold text-primary mb-2">Payment Terms</div>
+          <div className="text-sm space-y-1">
+            <div>Advance Payable: <strong>₹{quotation.advanceAmount.toLocaleString()}</strong> ({quotation.advancePercent}%)</div>
+            <div>Balance Amount: <strong>₹{quotation.balanceAmount.toLocaleString()}</strong></div>
+            <div className="mt-2 italic text-gray-600 text-xs">Quotation valid until {formatDate(quotation.validUntil)}. Room availability is subject to change unless advance is paid.</div>
+          </div>
+        </div>
+        
+        {settings?.bankName && (
+          <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+            <div className="font-bold text-gray-700 mb-2">Bank Details</div>
+            <div className="text-sm">
+              <div>Bank: {settings.bankName}</div>
+              {settings.accountName && <div>A/C Name: {settings.accountName}</div>}
+              {settings.accountNumber && <div>A/C No: {settings.accountNumber}</div>}
+              {settings.ifsc && <div>IFSC: {settings.ifsc}</div>}
+              {settings.branch && <div>Branch: {settings.branch}</div>}
+              {settings.upiId && <div>UPI: {settings.upiId}</div>}
             </div>
-          )}
-          {quotation.remarks && (
-            <div>
-              <div className="font-bold underline mb-1">Payment Mode / Remarks:</div>
-              <ul className="list-disc pl-8 space-y-1">
-                {quotation.remarks.split('\n').filter((t: string) => t.trim() !== '').map((remark: string, idx: number) => (
-                  <li key={idx} className="text-justify">{remark.trim().replace(/^[-•]\s*/, '')}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* Terms and Conditions */}
+      {settings?.termsAndConditions && (
+        <div className="text-xs text-gray-600 mt-8 break-before-auto">
+          <div className="font-bold mb-1">Terms & Conditions:</div>
+          <div className="whitespace-pre-wrap">
+            {settings.termsAndConditions}
+          </div>
         </div>
       )}
       
       {/* Footer Details */}
-      {settings?.footerLogoUrl && (
-        <div className="mt-8 flex justify-center">
-          <img src={settings.footerLogoUrl} alt="Footer Details" className="h-28 w-auto object-contain max-w-full mix-blend-multiply" />
-        </div>
-      )}
+      <div className="mt-12 text-center text-sm font-semibold text-primary pt-4 border-t border-gray-300">
+        Thank you for choosing Gajagamini Forest Resort! We look forward to hosting you.
+      </div>
+      </div>
     </div>
   );
 };

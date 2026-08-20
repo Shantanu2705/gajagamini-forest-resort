@@ -188,7 +188,7 @@ function UsersHubContent() {
 
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Email (Login ID) *</Label>
-              <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. amit@himalayan.co" />
+              <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. amit@gajagamini.com" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

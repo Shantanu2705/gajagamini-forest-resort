@@ -2,14 +2,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import {
-  Car,
   Users,
   MessageSquareQuote,
   CalendarCheck,
@@ -17,19 +16,16 @@ import {
   AlertCircle,
   PlusCircle,
   FileText,
-  Receipt,
   ArrowUpRight,
-  Bus,
-  CheckCircle2,
-  Clock,
-  Navigation,
+  BedDouble,
 } from 'lucide-react';
 
 export default function DashboardOverviewPage() {
-  const { vehicles, drivers, enquiries, bookings, invoices, quotations } = useFleetStore();
+  const { guests, roomTypes, enquiries, bookings, invoices, hotelQuotations, settings } = useHotelStore();
 
-  const activeVehicles = vehicles.filter((v) => v.status === 'active').length;
-  const activeDrivers = drivers.filter((d) => d.status === 'active').length;
+  const totalRooms = roomTypes.reduce((acc, curr) => acc + (curr.maxOccupancy || 1), 0);
+  const activeBookings = bookings.filter((b) => b.status === 'checked-in').length;
+  
   const newEnquiries = enquiries.filter((e) => e.status === 'new' || e.status === 'follow-up').length;
   const confirmedBookings = bookings.filter((b) => b.status === 'confirmed').length;
 
@@ -51,7 +47,7 @@ export default function DashboardOverviewPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">Executive Overview</h1>
             <p className="text-sm text-muted-foreground">
-              Live operational telemetry, fleet status, and financial metrics for Himalayan Vintage Holidays.
+              Live operational overview, room status, and financial metrics for {settings?.companyName || 'Gajagamini Forest Resort'}.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -72,23 +68,23 @@ export default function DashboardOverviewPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <Card className="border-l-4 border-l-blue-600 shadow-soft hover:shadow-medium transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Active Fleet</CardTitle>
-              <Car className="h-4 w-4 text-blue-600" />
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Available Rooms</CardTitle>
+              <BedDouble className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-extrabold">{activeVehicles} / {vehicles.length}</div>
-              <p className="text-[11px] text-muted-foreground mt-1">Ready for dispatch</p>
+              <div className="text-2xl font-extrabold">{totalRooms > 0 ? totalRooms - activeBookings : 0} / {totalRooms || 0}</div>
+              <p className="text-[11px] text-muted-foreground mt-1">Ready for check-in</p>
             </CardContent>
           </Card>
 
           <Card className="border-l-4 border-l-emerald-600 shadow-soft hover:shadow-medium transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Active Drivers</CardTitle>
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Active Guests</CardTitle>
               <Users className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-extrabold">{activeDrivers} / {drivers.length}</div>
-              <p className="text-[11px] text-muted-foreground mt-1">On duty personnel</p>
+              <div className="text-2xl font-extrabold">{activeBookings} / {guests.length}</div>
+              <p className="text-[11px] text-muted-foreground mt-1">Currently checked-in</p>
             </CardContent>
           </Card>
 
@@ -105,12 +101,12 @@ export default function DashboardOverviewPage() {
 
           <Card className="border-l-4 border-l-indigo-600 shadow-soft hover:shadow-medium transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Confirmed Trips</CardTitle>
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase">Confirmed Bookings</CardTitle>
               <CalendarCheck className="h-4 w-4 text-indigo-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-extrabold">{confirmedBookings}</div>
-              <p className="text-[11px] text-muted-foreground mt-1">Scheduled bookings</p>
+              <p className="text-[11px] text-muted-foreground mt-1">Scheduled check-ins</p>
             </CardContent>
           </Card>
 
@@ -149,7 +145,7 @@ export default function DashboardOverviewPage() {
                 </span>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
-              <div className="text-lg font-bold mt-1">{quotations.length} Proposals</div>
+              <div className="text-lg font-bold mt-1">{hotelQuotations.length} Proposals</div>
             </Card>
           </Link>
 
@@ -165,27 +161,27 @@ export default function DashboardOverviewPage() {
             </Card>
           </Link>
 
-          <Link href="/vehicles">
+          <Link href="/rooms">
             <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer group bg-gradient-to-br from-card to-muted/20">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-muted-foreground group-hover:text-primary transition-colors">
-                  Vehicles Master
+                  Rooms Master
                 </span>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
-              <div className="text-lg font-bold mt-1">{vehicles.length} Total Units</div>
+              <div className="text-lg font-bold mt-1">{roomTypes.length} Room Types</div>
             </Card>
           </Link>
 
-          <Link href="/corporate">
+          <Link href="/meal-plans">
             <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer group bg-gradient-to-br from-card to-muted/20">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-muted-foreground group-hover:text-primary transition-colors">
-                  Corporate B2B
+                  Meal Plans
                 </span>
                 <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </div>
-              <div className="text-lg font-bold mt-1">Contract Pricing</div>
+              <div className="text-lg font-bold mt-1">Active Plans</div>
             </Card>
           </Link>
         </div>
@@ -198,7 +194,7 @@ export default function DashboardOverviewPage() {
               <div>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
                   <MessageSquareQuote className="h-4 w-4 text-primary" />
-                  Recent Tourist & Corporate Enquiries
+                  Recent Room & Event Enquiries
                 </CardTitle>
                 <CardDescription className="text-xs">
                   Latest customer inquiries received across WhatsApp, email, and phone.
@@ -215,7 +211,7 @@ export default function DashboardOverviewPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[140px]">Customer</TableHead>
-                    <TableHead>Route & Vehicle</TableHead>
+                    <TableHead>Details & Room</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead className="text-right">Status</TableHead>
                   </TableRow>
@@ -228,27 +224,30 @@ export default function DashboardOverviewPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    recentEnquiries.map((e) => (
-                      <TableRow key={e.id}>
-                        <TableCell className="font-semibold text-foreground">
-                          <div className="truncate max-w-[130px]">{e.customerName}</div>
-                          <div className="text-[10px] text-muted-foreground font-mono">{e.mobile}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-xs font-medium truncate max-w-[160px]">
-                            {e.pickupLocation} → {e.destination}
-                          </div>
-                          <div className="text-[10px] text-primary font-semibold">{e.vehicle} ({e.passengers} pax)</div>
-                        </TableCell>
-                        <TableCell className="text-xs font-medium">
-                          {formatDate(e.startDate)}
-                          <span className="block text-[10px] text-muted-foreground">{e.days} Days trip</span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <StatusBadge status={e.status} />
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    recentEnquiries.map((e) => {
+                      const roomType = roomTypes.find(r => r.id === e.roomTypeId);
+                      return (
+                        <TableRow key={e.id}>
+                          <TableCell className="font-semibold text-foreground">
+                            <div className="truncate max-w-[130px]">{e.customerName}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono">{e.mobile}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-[10px] text-primary font-semibold">{roomType?.name || 'Standard Room'}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {e.adults} Adults, {e.children} Children
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs font-medium">
+                            <div className="font-semibold">{formatDate(e.checkIn)}</div>
+                            <div className="text-[10px] text-muted-foreground">to {formatDate(e.checkOut)}</div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <StatusBadge status={e.status} />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -261,10 +260,10 @@ export default function DashboardOverviewPage() {
               <div>
                 <CardTitle className="text-base font-bold flex items-center gap-2">
                   <CalendarCheck className="h-4 w-4 text-emerald-600" />
-                  Upcoming & Active Dispatches
+                  Upcoming Check-ins & Active Stays
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Confirmed bookings currently assigned or scheduled for dispatch.
+                  Confirmed bookings currently active or scheduled for check-in.
                 </CardDescription>
               </div>
               <Link href="/bookings">
@@ -277,43 +276,30 @@ export default function DashboardOverviewPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Client & Vehicle</TableHead>
-                    <TableHead>Itinerary</TableHead>
-                    <TableHead>Driver Assigned</TableHead>
+                    <TableHead>Guest & Room</TableHead>
+                    <TableHead>Stay Details</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {upcomingBookings.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
                         No upcoming bookings scheduled.
                       </TableCell>
                     </TableRow>
                   ) : (
                     upcomingBookings.map((b) => {
-                      const drv = drivers.find((d) => d.id === b.driverId);
+                      const assignedRooms = roomTypes.filter(r => b.roomIds?.includes(r.id)).map(r => r.name).join(', ') || 'Unassigned';
                       return (
                         <TableRow key={b.id}>
                           <TableCell className="font-semibold text-foreground">
                             <div className="truncate max-w-[130px]">{b.clientName}</div>
-                            <div className="text-[10px] text-primary font-medium">{b.vehicle}</div>
+                            <div className="text-[10px] text-primary font-medium">{assignedRooms}</div>
                           </TableCell>
                           <TableCell>
-                            <div className="text-xs font-medium truncate max-w-[150px]">
-                              {b.pickup} → {b.destination}
-                            </div>
-                            <div className="text-[10px] text-muted-foreground">{formatDate(b.startDate)}</div>
-                          </TableCell>
-                          <TableCell>
-                            {drv ? (
-                              <div className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                                {drv.name}
-                                <span className="block text-[10px] text-muted-foreground font-mono">{drv.mobile}</span>
-                              </div>
-                            ) : (
-                              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Unassigned</span>
-                            )}
+                            <div className="text-xs font-semibold">In: {formatDate(b.checkIn)}</div>
+                            <div className="text-[10px] text-muted-foreground">Out: {formatDate(b.checkOut)}</div>
                           </TableCell>
                           <TableCell className="text-right font-bold text-foreground">
                             {formatCurrency(b.amount)}

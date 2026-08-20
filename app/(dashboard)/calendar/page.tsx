@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
-import { Booking, VehicleType, BookingStatus, ClientType } from '@/types';
+import React, { useState, useMemo } from 'react';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
+import { Booking, BookingStatus } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -25,26 +25,24 @@ const getLocalDateString = (d: Date) => {
 const LEGEND_ITEMS = [
   { label: 'Confirmed', color: 'bg-emerald-500' },
   { label: 'Pending', color: 'bg-amber-500' },
+  { label: 'Checked In', color: 'bg-blue-500' },
+  { label: 'Checked Out', color: 'bg-slate-500' },
   { label: 'Cancelled', color: 'bg-rose-500' },
-  { label: 'Corporate', color: 'bg-slate-800' },
-  { label: 'Tourist', color: 'bg-teal-500' },
 ];
 
 const getBookingColor = (b: Booking) => {
   if (b.status === 'cancelled') return 'bg-rose-50 text-rose-700 border-rose-200';
   if (b.status === 'pending') return 'bg-amber-50 text-amber-700 border-amber-200';
-  if (b.status === 'completed') return 'bg-blue-50 text-blue-700 border-blue-100';
-
-  if (b.clientType === 'corporate') return 'bg-slate-100 text-slate-700 border-slate-200';
-  if (b.clientType === 'tourist') return 'bg-cyan-50 text-cyan-700 border-cyan-100';
+  if (b.status === 'checked-in') return 'bg-blue-50 text-blue-700 border-blue-200';
+  if (b.status === 'checked-out') return 'bg-slate-50 text-slate-700 border-slate-200';
   
-  return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+  return 'bg-emerald-50 text-emerald-700 border-emerald-100'; // confirmed
 };
 
 type ViewMode = 'day' | 'week' | 'month';
 
 export default function CalendarPage() {
-  const { bookings, addBooking, updateBooking, deleteBooking } = useFleetStore();
+  const { bookings, addBooking, updateBooking, deleteBooking, roomTypes } = useHotelStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,13 +52,15 @@ export default function CalendarPage() {
 
   // Form states
   const [clientName, setClientName] = useState('');
-  const [clientType, setClientType] = useState<ClientType>('tourist');
-  const [vehicle, setVehicle] = useState<VehicleType | string>('');
-  const [pickup, setPickup] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [roomIds, setRoomIds] = useState<string[]>([]);
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
   const [amount, setAmount] = useState<number>(0);
+  const [advance, setAdvance] = useState<number>(0);
+  const [adults, setAdults] = useState<number>(2);
+  const [children, setChildren] = useState<number>(0);
+  const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<BookingStatus>('confirmed');
 
   const filteredBookings = useMemo(() => {
@@ -68,9 +68,7 @@ export default function CalendarPage() {
     const lower = searchQuery.toLowerCase();
     return bookings.filter(b => 
       b.clientName?.toLowerCase().includes(lower) ||
-      b.vehicle?.toLowerCase().includes(lower) ||
-      b.destination?.toLowerCase().includes(lower) ||
-      b.pickup?.toLowerCase().includes(lower)
+      b.bookingNo?.toLowerCase().includes(lower)
     );
   }, [bookings, searchQuery]);
 
@@ -126,14 +124,18 @@ export default function CalendarPage() {
   const openNewModal = (dateStr?: string) => {
     setEditingBooking(null);
     setClientName('');
-    setClientType('tourist');
-    setVehicle('');
-    setPickup('');
-    setDestination('');
+    setMobile('');
+    setRoomIds([]);
     const today = getLocalDateString(new Date());
-    setStartDate(dateStr || today);
-    setEndDate(dateStr || today);
+    setCheckIn(dateStr || today);
+    const tomorrow = new Date(dateStr || today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    setCheckOut(getLocalDateString(tomorrow));
     setAmount(0);
+    setAdvance(0);
+    setAdults(2);
+    setChildren(0);
+    setNotes('');
     setStatus('confirmed');
     setIsModalOpen(true);
   };
@@ -141,49 +143,55 @@ export default function CalendarPage() {
   const openEditModal = (b: Booking) => {
     setEditingBooking(b);
     setClientName(b.clientName || '');
-    setClientType(b.clientType || 'tourist');
-    setVehicle(b.vehicle || '');
-    setPickup(b.pickup || '');
-    setDestination(b.destination || '');
-    setStartDate(b.startDate?.split('T')[0] || '');
-    setEndDate(b.endDate?.split('T')[0] || '');
+    setMobile(b.mobile || '');
+    setRoomIds(b.roomIds || []);
+    setCheckIn(b.checkIn?.split('T')[0] || '');
+    setCheckOut(b.checkOut?.split('T')[0] || '');
     setAmount(b.amount || 0);
+    setAdvance(b.advance || 0);
+    setAdults(b.adults || 2);
+    setChildren(b.children || 0);
+    setNotes(b.notes || '');
     setStatus(b.status || 'confirmed');
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clientName || !vehicle || !startDate || !endDate) return;
+    if (!clientName || !checkIn || !checkOut) return;
 
     if (editingBooking) {
       await updateBooking({
         ...editingBooking,
         clientName,
-        clientType,
-        vehicle,
-        pickup,
-        destination,
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
+        mobile,
+        roomIds,
+        checkIn: new Date(checkIn).toISOString(),
+        checkOut: new Date(checkOut).toISOString(),
         amount: Number(amount),
+        advance: Number(advance),
+        adults: Number(adults),
+        children: Number(children),
+        notes,
         status,
       });
     } else {
       const newId = `cal-b-${Date.now()}`;
       await addBooking({
         id: newId,
-        bookingNo: `CAL-${String(bookings.length + 101).padStart(3, '0')}`,
+        bookingNo: `BKG-${String(bookings.length + 101).padStart(3, '0')}`,
         clientName,
-        clientType,
-        vehicle,
-        pickup,
-        destination,
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
+        mobile,
+        guestId: '',
+        roomIds,
+        checkIn: new Date(checkIn).toISOString(),
+        checkOut: new Date(checkOut).toISOString(),
         amount: Number(amount),
+        advance: Number(advance),
+        adults: Number(adults),
+        children: Number(children),
+        notes,
         status,
-        advance: 0,
         createdAt: new Date().toISOString(),
       });
     }
@@ -204,10 +212,10 @@ export default function CalendarPage() {
     const isToday = dateStr === getLocalDateString(new Date());
     
     const dayBookings = filteredBookings.filter(b => {
-      if (!b.startDate) return false;
-      const start = b.startDate.split('T')[0];
-      const end = b.endDate?.split('T')[0] || start;
-      return dateStr >= start && dateStr <= end;
+      if (!b.checkIn) return false;
+      const start = b.checkIn.split('T')[0];
+      const end = b.checkOut?.split('T')[0] || start;
+      return dateStr >= start && dateStr < end; // Exclude check-out day visually in most cases, but let's just show it if they overlap
     });
 
     return (
@@ -222,13 +230,13 @@ export default function CalendarPage() {
         <div className="flex justify-between items-center mb-1">
           <span className={cn(
             "text-xs font-semibold px-1 rounded-sm",
-            isToday ? "bg-primary text-primary-foreground" : "text-slate-500"
+            isToday ? "bg-primary text-primary-foreground" : "text-muted-foreground"
           )}>
             {date.getDate()}
           </span>
           <div className="flex items-center gap-1">
             {dayBookings.length > 3 && (
-              <span className="text-[10px] font-medium text-slate-400">
+              <span className="text-[10px] font-medium text-muted-foreground/60">
                 +{dayBookings.length - 3}
               </span>
             )}
@@ -246,23 +254,29 @@ export default function CalendarPage() {
         </div>
         
         <div className="flex flex-col gap-[2px]">
-          {dayBookings.slice(0, 3).map(b => (
-            <div
-              key={b.id}
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditModal(b);
-              }}
-              className={cn(
-                "flex items-center gap-1.5 px-1.5 py-[3px] rounded-sm border cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate",
-                getBookingColor(b)
-              )}
-              title={`${b.clientName} - ${b.vehicle}${b.destination ? ` to ${b.destination}` : ''}`}
-            >
-              <GripVertical className="h-3 w-3 opacity-40 shrink-0" />
-              <span className="truncate">{b.clientName} · {b.vehicle}</span>
-            </div>
-          ))}
+          {dayBookings.slice(0, 3).map(b => {
+             const rNames = roomTypes.filter(rt => b.roomIds?.includes(rt.id)).map(r => r.name).join(', ') || 'Unassigned';
+             return (
+              <div
+                key={b.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditModal(b);
+                }}
+                className={cn(
+                  "flex items-center gap-1.5 px-1.5 py-[3px] rounded-sm border cursor-pointer hover:brightness-95 transition-all text-[10px] font-medium truncate",
+                  getBookingColor(b)
+                )}
+                title={`${b.clientName} - ${rNames}`}
+              >
+                <GripVertical className="h-3 w-3 opacity-40 shrink-0" />
+                <div className="flex flex-col truncate leading-tight">
+                  <span className="truncate font-semibold">{b.clientName} {b.mobile ? `(${b.mobile})` : ''}</span>
+                  <span className="truncate text-[9px] opacity-90">{rNames}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -365,13 +379,13 @@ export default function CalendarPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <Button variant="outline" size="icon" onClick={handlePrev} className="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100">
+              <Button variant="outline" size="icon" onClick={handlePrev} className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" onClick={handleToday} className="h-9 rounded-full px-4 bg-slate-50 hover:bg-slate-100 font-semibold">
+              <Button variant="outline" onClick={handleToday} className="h-9 rounded-full px-4 bg-muted/50 hover:bg-muted font-semibold">
                 Today
               </Button>
-              <Button variant="outline" size="icon" onClick={handleNext} className="h-9 w-9 rounded-full bg-slate-50 hover:bg-slate-100">
+              <Button variant="outline" size="icon" onClick={handleNext} className="h-9 w-9 rounded-full bg-muted/50 hover:bg-muted">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -385,32 +399,32 @@ export default function CalendarPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search bookings..." 
-                className="pl-9 rounded-full bg-slate-50 focus-visible:ring-1"
+                className="pl-9 rounded-full bg-muted/50 focus-visible:ring-1"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             
             <Tabs value={viewMode} onValueChange={(val) => setViewMode(val as ViewMode)} className="w-full sm:w-auto">
-              <TabsList className="rounded-full p-1 bg-slate-100">
+              <TabsList className="rounded-full p-1 bg-muted/50">
                 <TabsTrigger value="day" className="rounded-full px-4">Day</TabsTrigger>
                 <TabsTrigger value="week" className="rounded-full px-4">Week</TabsTrigger>
                 <TabsTrigger value="month" className="rounded-full px-4">Month</TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <Button onClick={() => openNewModal()} className="rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm ml-2">
+            <Button onClick={() => openNewModal()} className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm ml-2 font-bold">
               <PlusCircle className="mr-1.5 h-4 w-4" /> Add Booking
             </Button>
           </div>
         </div>
 
         {/* Legend Row */}
-        <div className="flex flex-wrap items-center gap-6 px-5 py-3 bg-teal-50/50 rounded-lg mb-4">
+        <div className="flex flex-wrap items-center gap-6 px-5 py-3 bg-muted/30 border rounded-lg mb-4">
           {LEGEND_ITEMS.map((item) => (
             <div key={item.label} className="flex items-center gap-2">
               <span className={cn("h-3 w-3 rounded-full", item.color)} />
-              <span className="text-[13px] font-medium text-teal-800">{item.label}</span>
+              <span className="text-[13px] font-medium text-muted-foreground">{item.label}</span>
             </div>
           ))}
         </div>
@@ -433,7 +447,7 @@ export default function CalendarPage() {
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Client Name *</Label>
+                  <Label>Guest Name *</Label>
                   <Input 
                     value={clientName} 
                     onChange={e => setClientName(e.target.value)} 
@@ -442,24 +456,29 @@ export default function CalendarPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Client Type</Label>
-                  <Select value={clientType} onValueChange={(val: ClientType) => setClientType(val)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tourist">Tourist</SelectItem>
-                      <SelectItem value="corporate">Corporate</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Mobile Number</Label>
+                  <Input 
+                    value={mobile} 
+                    onChange={e => setMobile(e.target.value)} 
+                    placeholder="e.g., 9876543210"
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label>Vehicle Name / Type *</Label>
+                  <Label>Adults</Label>
                   <Input 
-                    value={vehicle} 
-                    onChange={e => setVehicle(e.target.value)} 
-                    placeholder="e.g., Innova Crysta"
-                    required
+                    type="number"
+                    value={adults} 
+                    onChange={e => setAdults(Number(e.target.value))} 
+                    min="1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Children</Label>
+                  <Input 
+                    type="number"
+                    value={children} 
+                    onChange={e => setChildren(Number(e.target.value))} 
+                    min="0"
                   />
                 </div>
                 <div className="space-y-2">
@@ -471,52 +490,72 @@ export default function CalendarPage() {
                     <SelectContent>
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="confirmed">Confirmed</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="checked-in">Checked In</SelectItem>
+                      <SelectItem value="checked-out">Checked Out</SelectItem>
                       <SelectItem value="cancelled">Cancelled</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Pickup Location</Label>
-                  <Input 
-                    value={pickup} 
-                    onChange={e => setPickup(e.target.value)} 
-                    placeholder="e.g., Bagdogra Airport"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Destination</Label>
-                  <Input 
-                    value={destination} 
-                    onChange={e => setDestination(e.target.value)} 
-                    placeholder="e.g., Darjeeling"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Start Date *</Label>
-                  <Input 
-                    type="date" 
-                    value={startDate} 
-                    onChange={e => setStartDate(e.target.value)} 
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>End Date *</Label>
-                  <Input 
-                    type="date" 
-                    value={endDate} 
-                    onChange={e => setEndDate(e.target.value)} 
-                    required
-                  />
-                </div>
                 <div className="space-y-2 col-span-2">
+                  <Label>Room Types</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-1 border rounded-lg p-3 max-h-32 overflow-y-auto">
+                    {roomTypes.map(rt => (
+                      <label key={rt.id} className="flex items-center gap-2 text-sm">
+                        <input 
+                          type="checkbox" 
+                          checked={roomIds.includes(rt.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setRoomIds([...roomIds, rt.id]);
+                            else setRoomIds(roomIds.filter(id => id !== rt.id));
+                          }}
+                          className="rounded border-input"
+                        />
+                        {rt.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Check-in Date *</Label>
+                  <Input 
+                    type="date" 
+                    value={checkIn} 
+                    onChange={e => setCheckIn(e.target.value)} 
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Check-out Date *</Label>
+                  <Input 
+                    type="date" 
+                    value={checkOut} 
+                    onChange={e => setCheckOut(e.target.value)} 
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label>Amount (₹)</Label>
                   <Input 
                     type="number" 
                     value={amount} 
                     onChange={e => setAmount(Number(e.target.value))} 
-                    className="max-w-[50%]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Advance Received (₹)</Label>
+                  <Input 
+                    type="number" 
+                    value={advance} 
+                    onChange={e => setAdvance(Number(e.target.value))} 
+                  />
+                </div>
+                <div className="space-y-2 col-span-2">
+                  <Label>Notes</Label>
+                  <Input 
+                    value={notes} 
+                    onChange={e => setNotes(e.target.value)} 
+                    placeholder="Any special requests..."
                   />
                 </div>
               </div>

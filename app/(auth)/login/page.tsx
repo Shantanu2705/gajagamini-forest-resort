@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bus, Lock, Mail, AlertCircle, CheckCircle, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { Hotel, Lock, Mail, AlertCircle, CheckCircle, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,13 +62,13 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0f172a] shadow-lg shadow-black/50 mb-3 ring-4 ring-white/10">
-            <img src="/logo-icon.svg" alt="Logo" className="h-10 w-10 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-10 w-10 object-contain" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Himalayan Fleet
+            Gajagamini Resort
           </h1>
           <p className="text-xs font-semibold tracking-widest text-blue-300/80 uppercase mt-1">
-            Enterprise Transport & Quotation Portal
+            Enterprise Hotel & Quotation Portal
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export default function LoginPage() {
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Sign In to Portal</CardTitle>
             <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
-              Enter your credentials to manage bookings, vehicles, and billing.
+              Enter your credentials to manage bookings, rooms, and billing.
             </CardDescription>
           </CardHeader>
 
@@ -194,13 +194,13 @@ export default function LoginPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => fillDemoAccount('manager@himalayan.co', 'demo1234')}
+                onClick={() => fillDemoAccount('manager@gajagamini.com', 'demo1234')}
                 className="flex flex-col items-start p-2 h-auto border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-left"
               >
                 <div className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-300">
-                  <Bus className="h-3.5 w-3.5" /> Manager Role
+                  <Hotel className="h-3.5 w-3.5" /> Manager Role
                 </div>
-                <div className="text-[10px] text-slate-500 truncate w-full">manager@himalayan.co</div>
+                <div className="text-[10px] text-slate-500 truncate w-full">manager@gajagamini.com</div>
               </Button>
             </div>
             <div className="text-[10px] text-center text-slate-400 dark:text-slate-500 w-full pt-1">
@@ -210,7 +210,7 @@ export default function LoginPage() {
         </Card>
 
         <div className="mt-6 text-center text-[11px] text-slate-400 dark:text-slate-500">
-          © {new Date().getFullYear()} Himalayan Vintage Holidays & Himalayan Buses. All rights reserved.
+          © {new Date().getFullYear()} Gajagamini Forest Resort. All rights reserved.
         </div>
       </div>
     </div>

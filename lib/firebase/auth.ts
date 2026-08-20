@@ -13,12 +13,7 @@ export const DEMO_USERS: Record<string, { name: string; role: Role; password: st
     role: 'admin',
     password: 'admin123',
   },
-  'admin@himalayan.co': {
-    name: 'Admin',
-    role: 'admin',
-    password: 'admin123',
-  },
-  'manager@himalayan.co': {
+  'manager@gajagamini.com': {
     name: 'Tenzin Norgay (Manager)',
     role: 'manager',
     password: 'demo1234',

@@ -10,23 +10,22 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Himalayan Fleet Enterprise — Transport & Quotation Management',
-    template: '%s | Himalayan Fleet Enterprise',
+    default: 'Gajagamini Forest Resort — Hotel & Quotation Management',
+    template: '%s | Gajagamini Forest Resort',
   },
   description:
-    'Enterprise-grade transport, fleet management, multi-day itinerary builder, automated billing, and quotation portal for Himalayan Vintage Holidays.',
+    'Enterprise-grade hotel management, room booking, automated billing, and quotation portal for Gajagamini Forest Resort.',
   keywords: [
-    'Himalayan Taxi',
-    'Fleet Management',
-    'Transport ERP',
-    'Sikkim Darjeeling Taxi',
+    'Hotel Management',
+    'Room Booking',
+    'Resort ERP',
     'Quotation Builder',
     'Billing Apps',
   ],
-  authors: [{ name: 'Himalayan Vintage Holidays' }],
+  authors: [{ name: 'Gajagamini Forest Resort' }],
   openGraph: {
-    title: 'Himalayan Fleet Enterprise Portal',
-    description: '100% production-ready transport and quotation system.',
+    title: 'Gajagamini Forest Resort Portal',
+    description: '100% production-ready hotel and quotation system.',
     type: 'website',
   },
 };

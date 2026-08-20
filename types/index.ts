@@ -11,81 +11,61 @@ export interface User {
   createdAt?: string;
 }
 
-export type VehicleCategory = 
-  | 'Sedan' 
-  | 'SUV' 
-  | 'Innova Crysta' 
-  | 'Tempo Traveller' 
-  | '22 Seater Bus' 
-  | '27 Seater Bus'
-  | 'Toyota Innova'
-  | 'Scorpio N / Classic'
-  | 'Maruti Ertiga / Rumion'
-  | 'Force Traveller 12-Seater'
-  | 'Force Traveller 17-Seater'
-  | 'Luxury Coach 25-Seater'
-  | string;
-
-export type VehicleType = VehicleCategory;
-export type VehicleStatus = 'active' | 'maintenance' | 'inactive' | string;
-
-export interface Vehicle {
-  id: string;
-  category?: VehicleCategory;
-  type?: VehicleCategory;
-  name: string;
-  registration?: string;
-  regNo?: string;
-  seatingCapacity: number;
-  driverName?: string;
-  driverMobile?: string;
-  fuelType?: 'Diesel' | 'Petrol' | 'EV' | 'Hybrid' | 'diesel' | 'petrol' | 'ev' | string;
-  status?: VehicleStatus;
-  imageUrl?: string;
-  permitExpiry?: string;
-  insuranceExpiry?: string;
-  createdAt?: string;
-}
-
-export type DriverStatus = 'active' | 'on-leave' | 'inactive' | string;
-
-export interface Driver {
+export interface Guest {
   id: string;
   name: string;
   mobile: string;
-  license?: string;
-  licenseNo?: string;
-  badgeNo?: string;
-  licenseExpiry?: string;
-  assignedVehicleId?: string;
-  salary?: number;
-  status?: DriverStatus;
-  avatarUrl?: string;
-  licenseUrl?: string;
-  createdAt?: string;
-}
-
-export interface CorporateClient {
-  id: string;
-  companyName: string;
-  contactPerson: string;
-  mobile: string;
+  whatsapp?: string;
   email?: string;
-  gst?: string;
+  address?: string;
+  company?: string;
   gstin?: string;
-  billingAddress?: string;
-  contractPricing?: string;
-  contractRate?: number;
-  discountPercent?: number;
-  billingCycle?: string;
-  status?: string;
-  logoUrl?: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RoomType {
+  id: string;
+  name: string;
+  description?: string;
+  maxOccupancy?: number;
+  maxAdults?: number;
+  maxChildren?: number;
+  basePrice: number;
+  extraAdultPrice?: number;
+  extraChildPrice?: number;
+  extraBedPrice?: number;
+  isActive: boolean;
   createdAt?: string;
 }
 
-export type ClientType = 'tourist' | 'corporate' | 'b2b' | string;
-export type EnquiryType = ClientType;
-export type QuotationType = ClientType;
+export interface MealPlan {
+  id: string;
+  name: string;
+  description?: string;
+  adultPrice: number;
+  childPrice: number;
+  includesBreakfast?: boolean;
+  includesLunch?: boolean;
+  includesDinner?: boolean;
+  includesSnacks?: boolean;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+export interface AdditionalService {
+  id: string;
+  name: string;
+  description?: string;
+  unitPrice: number;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+// ----------------------------------------------------
+// ENQUIRY
+// ----------------------------------------------------
 export type EnquiryStatus = 'new' | 'follow-up' | 'quotation-sent' | 'confirmed' | 'cancelled' | string;
 
 export interface Enquiry {
@@ -95,150 +75,149 @@ export interface Enquiry {
   mobile: string;
   whatsapp?: string;
   email?: string;
-  clientType?: ClientType;
-  type?: ClientType;
-  pickupLocation: string;
-  destination: string;
-  startDate: string;
-  endDate?: string;
-  days: number;
-  passengers: number;
-  ticketRequired?: boolean;
-  hotelRequired?: boolean;
-  hotelType?: 'with-hotel' | 'without-hotel' | string;
-  vehicle: VehicleCategory | string;
-  places?: string;
+  
+  checkIn: string;
+  checkOut: string;
+  adults: number;
+  children: number;
+  roomTypeId?: string;
+  
   specialRequirements?: string;
   internalNotes?: string;
-  customerRemarks?: string;
-  notes?: string;
   status?: EnquiryStatus;
   createdAt?: string;
 }
 
-export type QuotationStatus = 'draft' | 'sent' | 'confirmed' | 'cancelled' | string;
-
-export interface ItineraryItem {
-  id?: string;
-  day?: number;
-  title: string;
-  description: string;
-}
-
-export interface ItineraryDay {
-  day: number;
-  title: string;
-  description: string;
-}
-
-export interface QuotationVehicle {
-  id: string;
-  category?: VehicleCategory;
-  quantity?: number;
-  vehicleName?: string;
-  registration?: string;
-  driverName?: string;
-}
-
-export interface QuotationRoute {
-  id: string;
-  pickup?: string;
-  destination?: string;
-  description?: string;
-  km?: number;
-  toll?: number;
-  parking?: number;
-}
-
-export interface QuotationCorporatePricing {
-  perKm?: number;
-  perHour?: number;
-  extraKm?: number;
-  extraHour?: number;
-  driverAllowance?: number;
-  nightCharge?: number;
-  toll?: number;
-  parking?: number;
-}
-
-export interface QuotationTouristPricing {
-  perDay?: number;
-  packagePrice?: number;
-  extraSightseeing?: number;
-  permits?: number;
-  toll?: number;
-  parking?: number;
-  extraVehicle?: number;
-}
-
-export interface Quotation {
-  id: string;
-  quotationNo?: string;
-  enquiryId?: string;
-  customerName?: string;
-  clientName: string;
-  mobile?: string;
-  clientPhone?: string;
-  clientEmail?: string;
-  companyName?: string;
-  gstin?: string;
-  pickupLocation: string;
-  vehicle: string;
-  startDate: string;
-  travelDate?: string;
-  destination: string;
-  persons?: number;
-  passengers: number;
-  days: number;
-  clientType?: ClientType;
-  type?: ClientType;
-  itinerary?: ItineraryItem[] | any[];
-  vehicles?: QuotationVehicle[] | any[];
-  routes?: QuotationRoute[] | any[];
-  corporate?: QuotationCorporatePricing | any;
-  corporatePricing?: any;
-  tourist?: QuotationTouristPricing | any;
-  touristPricing?: any;
-  baseAmount: number;
-  subtotal: number;
-  gstPercent?: number;
-  gstAmount: number;
-  additionalCharges?: number;
-  totalAmount: number;
-  hasGst?: boolean;
-  createdAt?: string;
-  status: QuotationStatus;
-  inclusions?: string[];
-  exclusions?: string[];
-}
-
-export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | string;
+// ----------------------------------------------------
+// BOOKING
+// ----------------------------------------------------
+export type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'checked-in' | 'checked-out' | string;
 
 export interface Booking {
   id: string;
   bookingNo?: string;
   quotationId?: string;
   enquiryId?: string;
+  
+  guestId?: string;
   clientName: string;
-  clientType?: ClientType;
-  vehicle?: VehicleCategory | string;
-  pickup?: string;
-  destination?: string;
-  startDate?: string;
-  endDate?: string;
+  mobile?: string;
+  
+  checkIn: string;
+  checkOut: string;
+  roomIds?: string[];
+  
   status: BookingStatus;
   amount: number;
   advance: number;
-  driverId?: string;
-  vehicleId?: string;
-  mobile?: string;
+  balance?: number;
+  adults?: number;
+  children?: number;
+  nights?: number;
+  roomNumbers?: string[];
   createdAt?: string;
   notes?: string;
+  source?: string;
 }
 
-export type PaymentMethod = 'Cash' | 'UPI' | 'Bank Transfer' | 'Credit Card' | 'Debit Card' | 'Cheque' | 'cash' | 'upi' | 'bank-transfer' | 'credit-card' | 'debit-card' | 'cheque' | string;
+// ----------------------------------------------------
+// QUOTATION
+// ----------------------------------------------------
+export interface HotelQuotationRoomItem {
+  id: string;
+  roomId: string;
+  roomName: string;
+  numberOfRooms: number;
+  adults: number;
+  children: number;
+  extraAdults: number;
+  extraChildren: number;
+  extraBeds: number;
+  nights: number;
+  ratePerNight: number;
+  extraAdultRate: number;
+  extraChildRate: number;
+  extraBedRate: number;
+  subtotal: number;
+}
+
+export interface HotelQuotationFoodItem {
+  id: string;
+  mealPlanId: string;
+  mealPlanName: string;
+  adults: number;
+  children: number;
+  days: number;
+  adultRate: number;
+  childRate: number;
+  subtotal: number;
+}
+
+export interface HotelQuotationServiceItem {
+  id: string;
+  serviceId?: string;
+  serviceName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface HotelQuotation {
+  id: string;
+  quotationNo: string;
+  guestId?: string;
+  guestName: string;
+  guestMobile: string;
+  guestEmail?: string;
+  guestAddress?: string;
+  companyName?: string;
+  checkIn: string;
+  checkOut: string;
+  nights: number;
+  adults: number;
+  children: number;
+  infants: number;
+  
+  rooms: HotelQuotationRoomItem[];
+  food: HotelQuotationFoodItem[];
+  services: HotelQuotationServiceItem[];
+  
+  roomSubtotal: number;
+  foodSubtotal: number;
+  serviceSubtotal: number;
+  totalSubtotal: number;
+  
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  discountAmount: number;
+  
+  taxableAmount: number;
+  gstPercent: number;
+  gstAmount: number;
+  
+  grandTotal: number;
+  advancePercent: number;
+  advanceAmount: number;
+  balanceAmount: number;
+  
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired' | 'confirmed' | 'cancelled';
+  validUntil: string;
+  termsAndConditions?: string;
+  paymentInstructions?: string;
+  internalNotes?: string;
+  
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// Keep backward compatibility for any component mapping 'Quotation'
+export type Quotation = HotelQuotation;
+
+// ----------------------------------------------------
+// INVOICE & BILLING
+// ----------------------------------------------------
+export type PaymentMethod = 'Cash' | 'UPI' | 'Bank Transfer' | 'Credit Card' | 'Debit Card' | 'Cheque' | string;
 export type PaymentStatus = 'unpaid' | 'partially-paid' | 'paid' | 'overdue' | 'cancelled' | string;
-export type ReceiptType = 'Confirmation cum Advance Receipt' | 'Advance Receipt' | 'Full Payment Receipt' | 'Booking Confirmation' | string;
 
 export interface InvoiceItem {
   id?: string;
@@ -246,15 +225,14 @@ export interface InvoiceItem {
   serviceDetails?: string;
   dateFrom?: string;
   dateTo?: string;
-  vehicles?: string;
   sacCode?: string;
-  hsnSac?: string;
   quantity: number;
   rate: number;
   discountPercent?: number;
   gstPercent?: number;
   taxableAmount?: number;
   amount?: number;
+  hsnSac?: string;
 }
 
 export interface Invoice {
@@ -269,15 +247,15 @@ export interface Invoice {
   clientAddress?: string;
   billingAddress?: string;
   clientState?: string;
-  supplyType?: string;
   clientGst?: string;
   clientGstin?: string;
   paymentTerms?: string;
-  travellers?: string;
+  
   date?: string;
   issueDate?: string;
   dueDate?: string;
   items: InvoiceItem[];
+  
   subtotal: number;
   gstPercent?: number;
   cgst?: number;
@@ -287,17 +265,22 @@ export interface Invoice {
   roundOff?: number;
   totalAmount: number;
   hasGst?: boolean;
+  
   paidAmount: number;
   advanceReceived?: number;
   balanceAmount: number;
   status: PaymentStatus;
+  
   notes?: string;
   terms?: string;
-  disclaimerNote?: string;
   placeOfIssue?: string;
   signatoryName?: string;
+  disclaimerNote?: string;
   extraNote?: string;
+  supplyType?: string;
 }
+
+export type ReceiptType = 'Confirmation cum Advance Receipt' | 'Advance Receipt' | 'Full Payment Receipt' | 'Booking Confirmation' | string;
 
 export interface Receipt {
   id: string;
@@ -313,13 +296,10 @@ export interface Receipt {
   referenceNo?: string;
   receiptType?: ReceiptType;
   notes?: string;
-
-  // Extended Fields for Full-Page Builder
+  
   quotationNo?: string;
   bookingReference?: string;
-  destination?: string;
-  travelStart?: string;
-  travelEnd?: string;
+  stayDetails?: string;
   
   grandTotal?: number;
   advancePercent?: number;
@@ -338,88 +318,24 @@ export interface Receipt {
   includes?: string;
   costingOverride?: string;
   advanceLineOverride?: string;
-  stayDetails?: string;
   checkedByName?: string;
   designation?: string;
+  destination?: string;
+  travelStart?: string;
+  travelEnd?: string;
 }
 
-export interface RouteMaster {
-  id: string;
-  name?: string;
-  pickup: string;
-  destination: string;
-  km?: number;
-  distanceKm?: number;
-  estHours?: number;
-  durationHours?: number;
-  toll?: number;
-  parking?: number;
-  notes?: string;
-  baseRates?: { [key: string]: number };
-}
-
-export interface DestinationMaster {
-  id: string;
-  name: string;
-  state?: string;
-  description?: string;
-}
-
-export interface PermitMaster {
-  id: string;
-  name: string;
-  price: number;
-  region: string;
-}
-
-export interface SightseeingMaster {
-  id: string;
-  name: string;
-  price: number;
-  destination: string;
-  notes?: string;
-}
-
-export interface InclusionMaster {
-  id: string;
-  text?: string;
-  title?: string;
-}
-
-export interface ExclusionMaster {
-  id: string;
-  text?: string;
-  title?: string;
-}
-
-export interface CorporatePricing {
-  id: string;
-  clientId: string;
-  companyName: string;
-  vehicleCategory: VehicleCategory;
-  perKmRate: number;
-  perDayRate: number;
-  driverAllowance: number;
-  nightHaltCharge: number;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: 'booking' | 'driver' | 'payment' | 'trip' | 'info' | string;
-  read: boolean;
-  createdAt: string;
-}
-
+// ----------------------------------------------------
+// UTILS
+// ----------------------------------------------------
 export interface SerialCounterItem {
   year: number;
   next: number;
 }
 
 export interface SerialCounters {
-  transport: SerialCounterItem;
-  package: SerialCounterItem;
+  hotelQuotation: SerialCounterItem;
+  booking: SerialCounterItem;
   invoice: SerialCounterItem;
   receipt: SerialCounterItem;
 }

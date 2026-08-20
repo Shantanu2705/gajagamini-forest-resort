@@ -2,8 +2,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
-import { Booking, VehicleType, BookingStatus } from '@/types';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
+import { Booking, BookingStatus } from '@/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,11 +23,11 @@ import {
   Trash2,
   Edit,
   User,
-  MapPin,
-  Car,
+  BedDouble,
   QrCode,
   Phone,
   CheckCircle2,
+  Bed,
 } from 'lucide-react';
 
 function BookingsHubContent() {
@@ -35,7 +35,7 @@ function BookingsHubContent() {
   const searchParams = useSearchParams();
   const fromQuotationId = searchParams.get('fromQuotationId');
 
-  const { bookings, addBooking, updateBooking, deleteBooking, drivers, vehicles, quotations } = useFleetStore();
+  const { bookings, addBooking, updateBooking, deleteBooking, roomTypes, hotelQuotations } = useHotelStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,53 +48,47 @@ function BookingsHubContent() {
   // Form states
   const [clientName, setClientName] = useState('');
   const [mobile, setMobile] = useState('');
-  const [pickup, setPickup] = useState('Bagdogra Airport (IXB)');
-  const [destination, setDestination] = useState('Gangtok & Darjeeling Circuit');
-  const [vehicle, setVehicle] = useState<VehicleType | string>('Innova Crysta');
-  const [driverId, setDriverId] = useState<string>('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
-  const [endDate, setEndDate] = useState(() => new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]);
-  const [amount, setAmount] = useState(25000);
-  const [advance, setAdvance] = useState(12500);
+  const [roomIds, setRoomIds] = useState<string[]>([]);
+  const [checkIn, setCheckIn] = useState(new Date().toISOString().split('T')[0]);
+  const [checkOut, setCheckOut] = useState(() => new Date(Date.now() + 1 * 86400000).toISOString().split('T')[0]);
+  const [amount, setAmount] = useState(5000);
+  const [advance, setAdvance] = useState(1000);
   const [status, setStatus] = useState<BookingStatus>('confirmed');
   const [notes, setNotes] = useState('');
 
   // Auto conversion from quotation
   useEffect(() => {
     if (fromQuotationId) {
-      const q = quotations.find((item) => item.id === fromQuotationId);
+      const q = hotelQuotations.find((item) => item.id === fromQuotationId);
       if (q) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setClientName(q.clientName || '');
-        setMobile(q.clientPhone || q.mobile || '');
-        setPickup(q.pickupLocation || '');
-        setDestination(q.destination || '');
-        setVehicle(q.vehicle || '');
-        if (q.startDate) {
-          setStartDate(q.startDate.split('T')[0]);
-          const eD = new Date(new Date(q.startDate).getTime() + ((q.days || 1) - 1) * 86400000);
-          setEndDate(eD.toISOString().split('T')[0]);
+        setClientName(q.guestName || '');
+        setMobile(q.guestMobile || '');
+        if (q.checkIn) {
+          setCheckIn(q.checkIn.split('T')[0]);
         }
-        setAmount(q.totalAmount || 0);
-        setAdvance(Math.round((q.totalAmount || 0) * 0.5));
+        if (q.checkOut) {
+          setCheckOut(q.checkOut.split('T')[0]);
+        }
+        if (q.rooms) {
+          setRoomIds(q.rooms.map(r => r.roomId));
+        }
+        setAmount(q.grandTotal || 0);
+        setAdvance(q.advanceAmount || 0);
         setEditingBooking(null);
         setIsModalOpen(true);
       }
     }
-  }, [fromQuotationId, quotations]);
+  }, [fromQuotationId, hotelQuotations]);
 
   const openNewModal = () => {
     setEditingBooking(null);
     setClientName('');
     setMobile('');
-    setPickup('Bagdogra Airport (IXB)');
-    setDestination('Gangtok & Darjeeling Circuit');
-    setVehicle('Innova Crysta');
-    setDriverId(drivers[0]?.id || '');
-    setStartDate(new Date().toISOString().split('T')[0]);
-    setEndDate(new Date(Date.now() + 4 * 86400000).toISOString().split('T')[0]);
-    setAmount(25000);
-    setAdvance(12500);
+    setRoomIds([]);
+    setCheckIn(new Date().toISOString().split('T')[0]);
+    setCheckOut(new Date(Date.now() + 1 * 86400000).toISOString().split('T')[0]);
+    setAmount(5000);
+    setAdvance(1000);
     setStatus('confirmed');
     setNotes('');
     setIsModalOpen(true);
@@ -104,12 +98,9 @@ function BookingsHubContent() {
     setEditingBooking(b);
     setClientName(b.clientName || '');
     setMobile(b.mobile || '');
-    setPickup(b.pickup || '');
-    setDestination(b.destination || '');
-    setVehicle((b.vehicle || '') as any);
-    setDriverId(b.driverId || '');
-    setStartDate(b.startDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
-    setEndDate(b.endDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
+    setRoomIds(b.roomIds || []);
+    setCheckIn(b.checkIn?.split('T')[0] || new Date().toISOString().split('T')[0]);
+    setCheckOut(b.checkOut?.split('T')[0] || new Date().toISOString().split('T')[0]);
     setAmount(b.amount || 0);
     setAdvance(b.advance || 0);
     setStatus((b.status || 'confirmed') as any);
@@ -126,12 +117,9 @@ function BookingsHubContent() {
         ...editingBooking,
         clientName,
         mobile,
-        pickup,
-        destination,
-        vehicle,
-        driverId: driverId || undefined,
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
+        roomIds,
+        checkIn: new Date(checkIn).toISOString(),
+        checkOut: new Date(checkOut).toISOString(),
         amount: Number(amount),
         advance: Number(advance),
         status,
@@ -144,12 +132,9 @@ function BookingsHubContent() {
         bookingNo: `BKG-2026-${String(bookings.length + 101).padStart(3, '0')}`,
         clientName,
         mobile,
-        pickup,
-        destination,
-        vehicle,
-        driverId: driverId || undefined,
-        startDate: new Date(startDate).toISOString(),
-        endDate: new Date(endDate).toISOString(),
+        roomIds,
+        checkIn: new Date(checkIn).toISOString(),
+        checkOut: new Date(checkOut).toISOString(),
         amount: Number(amount),
         advance: Number(advance),
         status,
@@ -173,7 +158,6 @@ function BookingsHubContent() {
     const matchesSearch =
       (b.clientName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (b.bookingNo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (b.destination || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (b.mobile || '').includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || b.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -183,9 +167,9 @@ function BookingsHubContent() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bookings & Dispatch Master</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Room Bookings</h1>
           <p className="text-sm text-muted-foreground">
-            Manage trip reservations, assign drivers and vehicles, and track collection statuses.
+            Manage reservations, room assignments, and track payment collection statuses.
           </p>
         </div>
         <Button onClick={openNewModal} className="bg-primary text-primary-foreground font-semibold shadow-sm">
@@ -199,7 +183,7 @@ function BookingsHubContent() {
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search booking #, client name, mobile..."
+              placeholder="Search booking #, guest name, mobile..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 h-9"
@@ -209,7 +193,7 @@ function BookingsHubContent() {
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Filter className="h-4 w-4 text-muted-foreground hidden sm:block" />
             <div className="flex flex-wrap gap-1">
-              {['all', 'confirmed', 'pending', 'completed', 'cancelled'].map((st) => (
+              {['all', 'confirmed', 'pending', 'checked-in', 'checked-out', 'cancelled'].map((st) => (
                 <Button
                   key={st}
                   variant={statusFilter === st ? 'default' : 'outline'}
@@ -231,9 +215,9 @@ function BookingsHubContent() {
           <TableHeader>
             <TableRow>
               <TableHead>Booking # & Date</TableHead>
-              <TableHead>Client Details</TableHead>
-              <TableHead>Route & Dates</TableHead>
-              <TableHead>Driver Assigned</TableHead>
+              <TableHead>Guest Details</TableHead>
+              <TableHead>Stay Dates</TableHead>
+              <TableHead>Rooms Assigned</TableHead>
               <TableHead>Payment & Balance</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -243,13 +227,14 @@ function BookingsHubContent() {
             {filtered.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
-                  No bookings found. Click "Log Booking" to schedule a trip!
+                  No bookings found. Click "Log Booking" to schedule a reservation!
                 </TableCell>
               </TableRow>
             ) : (
               filtered.map((b) => {
-                const drv = drivers.find((d) => d.id === b.driverId);
                 const balance = (b.amount || 0) - (b.advance || 0);
+                const assignedRooms = roomTypes.filter(rt => (b.roomIds || []).includes(rt.id));
+
                 return (
                   <TableRow key={b.id}>
                     <TableCell className="font-semibold">
@@ -267,28 +252,23 @@ function BookingsHubContent() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                        <MapPin className="h-3.5 w-3.5 text-red-500 shrink-0" />
-                        <span className="truncate max-w-[150px]">{b.pickup} → {b.destination}</span>
-                      </div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-[10px] font-bold bg-muted px-2 py-0.5 rounded text-primary uppercase">
-                          {b.vehicle}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">{formatDate(b.startDate)}</span>
+                      <div className="flex flex-col gap-1 text-xs font-semibold text-foreground">
+                        <span>Check In: {formatDate(b.checkIn)}</span>
+                        <span>Check Out: {formatDate(b.checkOut)}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {drv ? (
+                      {assignedRooms.length > 0 ? (
                         <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                          <div className="flex items-center gap-1">
-                            <CheckCircle2 className="h-3.5 w-3.5" /> {drv.name}
-                          </div>
-                          <span className="block text-[10px] text-muted-foreground font-mono">{drv.mobile}</span>
+                           <ul className="list-disc list-inside">
+                             {assignedRooms.map(r => (
+                               <li key={r.id} className="truncate">{r.name}</li>
+                             ))}
+                           </ul>
                         </div>
                       ) : (
                         <span className="text-[11px] text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded">
-                          Unassigned Driver
+                          Unassigned Room
                         </span>
                       )}
                     </TableCell>
@@ -349,17 +329,17 @@ function BookingsHubContent() {
           <DialogHeader>
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
               <CalendarCheck className="h-5 w-5 text-primary" />
-              {editingBooking ? 'Edit Booking Reservation' : 'Log New Booking Trip'}
+              {editingBooking ? 'Edit Booking Reservation' : 'Log New Room Booking'}
             </DialogTitle>
             <DialogDescription>
-              Assign vehicle and driver to confirm trip reservation.
+              Assign rooms and confirm reservation details.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="cname" className="text-xs font-semibold">Client Name *</Label>
+                <Label htmlFor="cname" className="text-xs font-semibold">Guest Name *</Label>
                 <Input id="cname" required value={clientName} onChange={(e) => setClientName(e.target.value)} />
               </div>
               <div className="space-y-1.5">
@@ -369,47 +349,28 @@ function BookingsHubContent() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="pickup" className="text-xs font-semibold">Pickup Point</Label>
-                <Input id="pickup" required value={pickup} onChange={(e) => setPickup(e.target.value)} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="dest" className="text-xs font-semibold">Destination Circuit</Label>
-                <Input id="dest" required value={destination} onChange={(e) => setDestination(e.target.value)} />
-              </div>
+               <div className="space-y-1.5 col-span-2">
+                  <Label className="text-xs font-semibold">Rooms Assigned</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-1 border rounded-lg p-3 max-h-32 overflow-y-auto">
+                    {roomTypes.map(rt => (
+                      <label key={rt.id} className="flex items-center gap-2 text-sm">
+                        <input 
+                          type="checkbox" 
+                          checked={roomIds.includes(rt.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setRoomIds([...roomIds, rt.id]);
+                            else setRoomIds(roomIds.filter(id => id !== rt.id));
+                          }}
+                          className="rounded border-input"
+                        />
+                        {rt.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Vehicle Assigned</Label>
-                <Select value={vehicle} onValueChange={(v) => setVehicle(v as VehicleType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Innova Crysta">Innova Crysta</SelectItem>
-                    <SelectItem value="Toyota Innova">Toyota Innova</SelectItem>
-                    <SelectItem value="Scorpio N / Classic">Scorpio N / Classic</SelectItem>
-                    <SelectItem value="Maruti Ertiga / Rumion">Maruti Ertiga / Rumion</SelectItem>
-                    <SelectItem value="Force Traveller 12-Seater">Force Traveller 12-Seater</SelectItem>
-                    <SelectItem value="Force Traveller 17-Seater">Force Traveller 17-Seater</SelectItem>
-                    <SelectItem value="Luxury Coach 25-Seater">Luxury Coach 25-Seater</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Assign Driver</Label>
-                <Select value={driverId} onValueChange={(v) => setDriverId(v)}>
-                  <SelectTrigger><SelectValue placeholder="Select Driver..." /></SelectTrigger>
-                  <SelectContent>
-                    {drivers.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name} ({d.mobile})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Booking Status</Label>
                 <Select value={status} onValueChange={(s) => setStatus(s as BookingStatus)}>
@@ -417,7 +378,8 @@ function BookingsHubContent() {
                   <SelectContent>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="checked-in">Checked In</SelectItem>
+                    <SelectItem value="checked-out">Checked Out</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
@@ -426,12 +388,12 @@ function BookingsHubContent() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Start Date</Label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                <Label className="text-xs font-semibold">Check In</Label>
+                <Input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">End Date</Label>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                <Label className="text-xs font-semibold">Check Out</Label>
+                <Input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold">Total Amount (₹)</Label>
@@ -444,8 +406,8 @@ function BookingsHubContent() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="bnotes" className="text-xs font-semibold">Driver Instructions / Notes</Label>
-              <Input id="bnotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Flight lands at 12:30 PM, meet at terminal exit with name board" />
+              <Label htmlFor="bnotes" className="text-xs font-semibold">Reception Instructions / Notes</Label>
+              <Input id="bnotes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. VIP guest, requires early check-in" />
             </div>
 
             <DialogFooter className="pt-4">

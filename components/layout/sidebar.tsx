@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/components/ui/button';
 import { useAuthStore } from '@/lib/store/use-auth-store';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import {
   LayoutDashboard,
   MessageSquareQuote,
@@ -12,14 +12,14 @@ import {
   CalendarCheck,
   Receipt,
   Car,
-  Users,
-  Building2,
-  MapPin,
-  BarChart3,
   Settings,
   ShieldCheck,
   ChevronRight,
   Bus,
+  Users,
+  Building2,
+  Utensils,
+  ConciergeBell
 } from 'lucide-react';
 
 export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void }> = ({
@@ -28,15 +28,18 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
 }) => {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
-  const { settings } = useFleetStore();
+  const { settings } = useHotelStore();
 
   const navItems = [
     { title: 'Dashboard', href: '/', icon: LayoutDashboard },
     { title: 'Calendar', href: '/calendar', icon: CalendarCheck },
-    { title: 'Enquiries', href: '/enquiries', icon: MessageSquareQuote },
+    { title: 'Bookings', href: '/bookings', icon: CalendarCheck },
+    { title: 'Guests', href: '/guests', icon: Users },
+    { title: 'Rooms', href: '/rooms', icon: Building2 },
+    { title: 'Meal Plans', href: '/meal-plans', icon: Utensils },
+    { title: 'Services', href: '/services', icon: ConciergeBell },
     { title: 'Quotations', href: '/quotations', icon: FileText },
     { title: 'Billing', href: '/billing', icon: Receipt },
-    { title: 'Reports', href: '/reports', icon: BarChart3 },
     { title: 'Settings', href: '/settings', icon: Settings },
   ];
 
@@ -59,11 +62,11 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
               />
             </div>
           ) : (
-            <img src="/logo-icon.svg" alt="Company Logo" className="h-14 w-14 shrink-0 object-contain transition-transform group-hover:scale-105 drop-shadow-sm" style={{ filter: "invert(0.8) sepia(1) hue-rotate(80deg) saturate(300%)" }} />
+            <img src="/logo.png" alt="Company Logo" className="h-20 w-auto shrink-0 object-contain transition-transform group-hover:scale-105" />
           )}
           <div className="flex flex-col mt-4">
             <span className="leading-tight text-green-950 font-extrabold text-[15px] tracking-wide">
-              {settings?.companyName || 'Himalayan Vintage Holidays'}
+              {settings?.companyName || 'Gajagamini Forest Resort'}
             </span>
           </div>
         </Link>

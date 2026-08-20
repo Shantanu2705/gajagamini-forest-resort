@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Printer, Share2, Download } from 'lucide-react';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 
 interface PdfPreviewModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export const PdfPreviewModal: React.FC<PdfPreviewModalProps> = ({
   children,
 }) => {
   const [mounted, setMounted] = React.useState(false);
-  const settings = useFleetStore((state) => state.settings);
+  const settings = useHotelStore((state) => state.settings);
 
   React.useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

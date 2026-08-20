@@ -2,7 +2,7 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,22 +10,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import { Search, Plus, FileText, Receipt as ReceiptIcon, FileClock, Trash2 } from 'lucide-react';
-import { Invoice, Receipt, Quotation, Booking } from '@/types';
+import { Search, Plus, FileText, Receipt as ReceiptIcon, Trash2 } from 'lucide-react';
 
 function BillingHubInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { invoices, receipts, quotations, bookings, deleteReceipt, deleteInvoice } = useFleetStore();
+  const { invoices, receipts, hotelQuotations, bookings, deleteReceipt, deleteInvoice } = useHotelStore();
   const tabParam = searchParams.get('tab') as 'quotations' | 'receipts' | 'invoices';
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const confirmedQuotations = quotations.filter(q => (q.status || '').toLowerCase() === 'confirmed');
+  const confirmedQuotations = hotelQuotations.filter(q => (q.status || '').toLowerCase() === 'confirmed');
   const confirmedBookings = bookings.filter(b => (b.status || '').toLowerCase() === 'confirmed');
 
   const filteredQuotations = confirmedQuotations.filter((q) =>
-    (q.clientName || q.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (q.guestName || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
     (q.quotationNo || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -98,9 +97,8 @@ function BillingHubInner() {
                 <TableHeader>
                   <TableRow className="border-b border-gray-100 hover:bg-transparent">
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Quotation #</TableHead>
-                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Customer</TableHead>
-                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Destination</TableHead>
-                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Travel</TableHead>
+                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Guest</TableHead>
+                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Stay Dates</TableHead>
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Payment</TableHead>
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Amount</TableHead>
                     <TableHead className="text-right font-semibold text-gray-500 text-[13px] h-12"></TableHead>
@@ -110,8 +108,8 @@ function BillingHubInner() {
                   {filteredQuotations.map((q) => {
                     const qReceipts = receipts.filter(r => r.quotationNo === q.quotationNo || (r.bookingId && r.bookingId === q.id));
                     const totalReceived = qReceipts.reduce((sum, r) => sum + (Number(r.amount) || Number(r.receivedAmount) || 0), 0);
-                    const balance = (q.totalAmount || 0) - totalReceived;
-                    const isFullyPaid = balance <= 0 && (q.totalAmount || 0) > 0;
+                    const balance = (q.grandTotal || 0) - totalReceived;
+                    const isFullyPaid = balance <= 0 && (q.grandTotal || 0) > 0;
                     const isPartiallyPaid = totalReceived > 0 && !isFullyPaid;
                     const existingInvoice = invoices.find(i => i.quotationId === q.id || (q.quotationNo && i.invoiceNo.includes(q.quotationNo)));
 
@@ -119,11 +117,12 @@ function BillingHubInner() {
                     <TableRow key={q.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                       <TableCell className="font-bold text-[13px] text-gray-700">{q.quotationNo}</TableCell>
                       <TableCell>
-                        <div className="font-medium text-[13px] text-gray-800">{q.clientName || q.customerName}</div>
-                        <div className="text-[12px] text-gray-400">{q.clientPhone || q.mobile}</div>
+                        <div className="font-medium text-[13px] text-gray-800">{q.guestName}</div>
+                        <div className="text-[12px] text-gray-400">{q.guestMobile}</div>
                       </TableCell>
-                      <TableCell className="text-[13px] text-gray-600 font-medium">{q.destination}</TableCell>
-                      <TableCell className="text-[13px] text-gray-600">{q.startDate ? formatDate(q.startDate) : '-'}</TableCell>
+                      <TableCell className="text-[13px] text-gray-600">
+                         {q.checkIn ? formatDate(q.checkIn) : '-'} to {q.checkOut ? formatDate(q.checkOut) : '-'}
+                      </TableCell>
                       <TableCell>
                         {isFullyPaid ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -142,7 +141,7 @@ function BillingHubInner() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(q.totalAmount)}</TableCell>
+                      <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(q.grandTotal)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
                           {isFullyPaid ? (
@@ -197,8 +196,6 @@ function BillingHubInner() {
                 <TableHeader>
                   <TableRow className="border-b border-gray-100 hover:bg-transparent">
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Client</TableHead>
-                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Vehicle</TableHead>
-                    <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Route</TableHead>
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Dates</TableHead>
                     <TableHead className="font-semibold text-gray-500 text-[13px] h-12">Amount</TableHead>
                     <TableHead className="text-right font-semibold text-gray-500 text-[13px] h-12"></TableHead>
@@ -208,10 +205,8 @@ function BillingHubInner() {
                   {filteredBookings.map((b) => (
                     <TableRow key={b.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                       <TableCell className="font-bold text-[13px] text-gray-800">{b.clientName}</TableCell>
-                      <TableCell className="text-[13px] text-gray-600">{b.vehicle}</TableCell>
-                      <TableCell className="text-[13px] text-gray-600 font-medium">{b.pickup} &rarr; {b.destination}</TableCell>
                       <TableCell className="text-[13px] text-gray-600">
-                        {b.startDate ? formatDate(b.startDate) : '-'} {b.endDate ? `- ${formatDate(b.endDate)}` : ''}
+                        {b.checkIn ? formatDate(b.checkIn) : '-'} {b.checkOut ? `- ${formatDate(b.checkOut)}` : ''}
                       </TableCell>
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(b.amount)}</TableCell>
                       <TableCell className="text-right">

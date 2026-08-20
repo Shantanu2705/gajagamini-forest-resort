@@ -1,19 +1,15 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import {
-  initialVehicles,
-  initialDrivers,
-  initialCorporateClients,
+  initialGuests,
+  initialRoomTypes,
+  initialMealPlans,
+  initialAdditionalServices,
   initialEnquiries,
   initialBookings,
   initialQuotations,
-  initialRoutes,
-  initialDestinations,
-  initialPermits,
-  initialSightseeings,
-  initialInclusions,
-  initialExclusions,
-  initialNotifications,
+  initialInvoices,
+  initialReceipts,
   initialSettings,
 } from '../lib/firebase/seed-data';
 
@@ -38,19 +34,16 @@ async function runSeed() {
   console.log('🚀 Starting Admin SDK live database seed for quotation-software-3...');
   let count = 0;
 
-  for (const v of initialVehicles) { await db.collection('vehicles').doc(v.id).set(v); count++; }
-  for (const d of initialDrivers) { await db.collection('drivers').doc(d.id).set(d); count++; }
-  for (const c of initialCorporateClients) { await db.collection('corporate').doc(c.id).set(c); count++; }
-  for (const e of initialEnquiries) { await db.collection('enquiries').doc(e.id).set(e); count++; }
-  for (const b of initialBookings) { await db.collection('bookings').doc(b.id).set(b); count++; }
-  for (const q of initialQuotations) { await db.collection('quotations').doc(q.id).set(q); count++; }
-  for (const r of initialRoutes) { await db.collection('routes').doc(r.id).set(r); count++; }
-  for (const dest of initialDestinations) { await db.collection('destinations').doc(dest.id).set(dest); count++; }
-  for (const p of initialPermits) { await db.collection('permits').doc(p.id).set(p); count++; }
-  for (const s of initialSightseeings) { await db.collection('sightseeings').doc(s.id).set(s); count++; }
-  for (const inc of initialInclusions) { await db.collection('inclusions').doc(inc.id).set(inc); count++; }
-  for (const exc of initialExclusions) { await db.collection('exclusions').doc(exc.id).set(exc); count++; }
-  for (const notif of initialNotifications) { await db.collection('notifications').doc(notif.id).set(notif); count++; }
+  for (const v of initialGuests) { await db.collection('guests').doc(v.id).set(v); count++; }
+  for (const d of initialRoomTypes) { await db.collection('roomTypes').doc(d.id).set(d); count++; }
+  for (const c of initialMealPlans) { await db.collection('mealPlans').doc(c.id).set(c); count++; }
+  for (const e of initialAdditionalServices) { await db.collection('additionalServices').doc(e.id).set(e); count++; }
+  for (const b of initialEnquiries) { await db.collection('enquiries').doc(b.id).set(b); count++; }
+  for (const q of initialBookings) { await db.collection('bookings').doc(q.id).set(q); count++; }
+  for (const r of initialQuotations) { await db.collection('hotelQuotations').doc(r.id).set(r); count++; }
+  for (const dest of initialInvoices) { await db.collection('invoices').doc(dest.id).set(dest); count++; }
+  for (const p of initialReceipts) { await db.collection('receipts').doc(p.id).set(p); count++; }
+
   await db.collection('settings').doc('company').set(initialSettings); count++;
 
   console.log(`✅ Successfully uploaded ${count} enterprise documents to live Firestore!`);

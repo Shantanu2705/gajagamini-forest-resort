@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useFleetStore } from '@/lib/store/use-fleet-store';
+import { useHotelStore } from '@/lib/store/use-hotel-store';
 import { Receipt, PaymentMethod } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ function ReceiptEditorPageInner() {
   const id = params.id as string;
   const isNew = id === 'new';
 
-  const { receipts, addReceipt, updateReceipt, deleteReceipt, quotations, settings } = useFleetStore();
+  const { receipts, addReceipt, updateReceipt, deleteReceipt, invoices, hotelQuotations, settings } = useHotelStore();
   
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const quotationId = searchParams.get('quotationId');
@@ -36,9 +36,6 @@ function ReceiptEditorPageInner() {
     clientMobile: '',
     quotationNo: '',
     bookingReference: '',
-    destination: '',
-    travelStart: '',
-    travelEnd: '',
     
     grandTotal: 0,
     advancePercent: 30,
@@ -47,21 +44,16 @@ function ReceiptEditorPageInner() {
     paymentDate: new Date().toISOString().split('T')[0],
     paymentMethod: 'UPI',
     referenceNo: '',
-    receivedBy: 'Siraj Bhowmick',
+    receivedBy: 'Admin',
     remarks: '',
 
     receiptHeading: 'Confirmation cum Advance Receipt',
     businessHouse: '',
     pax: '',
     packageType: '',
-    vehicleDetails: '',
-    duty: 'As per given itinerary',
-    includes: 'Toll Tax / Permits / Fuel / Vehicle / Driver Allowance',
-    costingOverride: '',
-    advanceLineOverride: '',
     stayDetails: '',
     checkedByName: '',
-    designation: 'Sales Head'
+    designation: 'Manager'
   });
 
   useEffect(() => {
@@ -69,21 +61,20 @@ function ReceiptEditorPageInner() {
       const existing = receipts.find(r => r.id === id);
       if (existing) setReceipt(existing);
     } else if (quotationId) {
-      const q = quotations.find(x => x.id === quotationId);
+      const q = hotelQuotations.find(x => x.id === quotationId);
       if (q) {
         setReceipt(prev => ({
           ...prev,
-          clientName: q.clientName || q.customerName || '',
-          clientMobile: q.clientPhone || q.mobile || '',
+          clientName: q.guestName || '',
+          clientMobile: q.guestMobile || '',
           quotationNo: q.quotationNo || '',
-          destination: q.destination || '',
-          pax: `${q.persons || q.passengers || 0} Passengers`,
-          grandTotal: q.baseAmount || q.totalAmount || 0,
-          vehicleDetails: q.vehicle || ''
+          pax: `${q.adults || 0} Adults, ${q.children || 0} Children`,
+          grandTotal: q.grandTotal || 0,
+          stayDetails: `${q.checkIn ? q.checkIn.split('T')[0] : ''} to ${q.checkOut ? q.checkOut.split('T')[0] : ''}`,
         }));
       }
     }
-  }, [isNew, id, receipts, quotationId, quotations]);
+  }, [isNew, id, receipts, quotationId, hotelQuotations]);
 
   // Auto calculate advance amount based on percent
   useEffect(() => {
@@ -104,7 +95,7 @@ function ReceiptEditorPageInner() {
       ...receipt,
       id: isNew ? `rec-${Date.now()}` : id,
       receiptNo: receipt.receiptNo || defaultReceiptNo,
-      clientName: receipt.clientName || 'Unknown Client',
+      clientName: receipt.clientName || 'Unknown Guest',
       amount: Number(receipt.receivedAmount) || 0,
       paymentMethod: (receipt.paymentMethod as PaymentMethod) || 'UPI'
     } as Receipt;
@@ -179,7 +170,7 @@ function ReceiptEditorPageInner() {
                     <Input type="date" value={receipt.date || ''} onChange={e => handleUpdate('date', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[12px] text-gray-500 font-medium">Customer name</Label>
+                    <Label className="text-[12px] text-gray-500 font-medium">Guest name</Label>
                     <Input value={receipt.clientName || ''} onChange={e => handleUpdate('clientName', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                   </div>
                   <div className="space-y-1.5">
@@ -193,20 +184,6 @@ function ReceiptEditorPageInner() {
                   <div className="space-y-1.5">
                     <Label className="text-[12px] text-gray-500 font-medium">Booking reference</Label>
                     <Input value={receipt.bookingReference || ''} onChange={e => handleUpdate('bookingReference', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[12px] text-gray-500 font-medium">Destination</Label>
-                    <Input value={receipt.destination || ''} onChange={e => handleUpdate('destination', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Travel start</Label>
-                      <Input type="date" value={receipt.travelStart || ''} onChange={e => handleUpdate('travelStart', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Travel end</Label>
-                      <Input type="date" value={receipt.travelEnd || ''} onChange={e => handleUpdate('travelEnd', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
                   </div>
                 </div>
               </Card>
@@ -284,48 +261,28 @@ function ReceiptEditorPageInner() {
                   
                   <div className="grid grid-cols-2 gap-5">
                     <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Business House</Label>
-                      <Input value={receipt.businessHouse || ''} onChange={e => handleUpdate('businessHouse', e.target.value)} placeholder="e.g. Saksham Tours" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Label className="text-[12px] text-gray-500 font-medium">Business / Company</Label>
+                      <Input value={receipt.businessHouse || ''} onChange={e => handleUpdate('businessHouse', e.target.value)} className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[12px] text-gray-500 font-medium">Pax</Label>
-                      <Input value={receipt.pax || ''} onChange={e => handleUpdate('pax', e.target.value)} placeholder="e.g. 08 Only (Adults / Children / Kids)" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Input value={receipt.pax || ''} onChange={e => handleUpdate('pax', e.target.value)} placeholder="e.g. 02 Adults" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[12px] text-gray-500 font-medium">Package</Label>
-                      <Input value={receipt.packageType || ''} onChange={e => handleUpdate('packageType', e.target.value)} placeholder="e.g. Transport Only" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Vehicle</Label>
-                      <Input value={receipt.vehicleDetails || ''} onChange={e => handleUpdate('vehicleDetails', e.target.value)} placeholder="e.g. 12-Seater, Tempo Traveler x 01" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Duty</Label>
-                      <Input value={receipt.duty || ''} onChange={e => handleUpdate('duty', e.target.value)} placeholder="As per given itinerary" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Includes</Label>
-                      <Input value={receipt.includes || ''} onChange={e => handleUpdate('includes', e.target.value)} placeholder="Toll Tax / Permits / Fuel / Vehicle / Driver Allowance" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Costing (override)</Label>
-                      <Input value={receipt.costingOverride || ''} onChange={e => handleUpdate('costingOverride', e.target.value)} placeholder="Auto-formatted from Grand Total" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[12px] text-gray-500 font-medium">Advance line (override)</Label>
-                      <Input value={receipt.advanceLineOverride || ''} onChange={e => handleUpdate('advanceLineOverride', e.target.value)} placeholder="Auto-formatted from Received Amount" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Input value={receipt.packageType || ''} onChange={e => handleUpdate('packageType', e.target.value)} placeholder="e.g. Room Only" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                     <div className="col-span-2 space-y-1.5">
                       <Label className="text-[12px] text-gray-500 font-medium">Stay</Label>
-                      <Input value={receipt.stayDetails || ''} onChange={e => handleUpdate('stayDetails', e.target.value)} placeholder="e.g. Lamahatta, Pedong" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Input value={receipt.stayDetails || ''} onChange={e => handleUpdate('stayDetails', e.target.value)} placeholder="e.g. 2026-08-20 to 2026-08-22" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[12px] text-gray-500 font-medium">Checked By (name)</Label>
-                      <Input value={receipt.checkedByName || ''} onChange={e => handleUpdate('checkedByName', e.target.value)} placeholder="e.g. Rohit Purbey" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Input value={receipt.checkedByName || ''} onChange={e => handleUpdate('checkedByName', e.target.value)} placeholder="e.g. Admin" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-[12px] text-gray-500 font-medium">Designation</Label>
-                      <Input value={receipt.designation || ''} onChange={e => handleUpdate('designation', e.target.value)} placeholder="Sales Head" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
+                      <Input value={receipt.designation || ''} onChange={e => handleUpdate('designation', e.target.value)} placeholder="Manager" className="h-10 rounded-xl bg-gray-50/50 border-gray-200 text-[14px]" />
                     </div>
                   </div>
                 </div>

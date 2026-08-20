@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useHotelStore } from '@/lib/store/use-hotel-store';
@@ -14,10 +14,19 @@ import { HotelQuotationRoomItem, HotelQuotationFoodItem, HotelQuotationServiceIt
 // We'll replace the old PdfPreviewModal later, or stub it for now
 // import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
 
-export default function NewHotelQuotation() {
+function NewHotelQuotationInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('editId');
+  const { 
+    fetchAll, 
+    guests, 
+    roomTypes, 
+    mealPlans, 
+    additionalServices, 
+    addQuotation, 
+    updateQuotation 
+  } = useHotelStore();
 
   useEffect(() => {
     fetchAll();
@@ -545,7 +554,15 @@ export default function NewHotelQuotation() {
           </Card>
         </div>
       </div>
-
+      <div className="pb-24" />
     </DashboardLayout>
+  );
+}
+
+export default function NewHotelQuotation() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <NewHotelQuotationInner />
+    </Suspense>
   );
 }

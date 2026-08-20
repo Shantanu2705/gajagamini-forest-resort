@@ -36,7 +36,9 @@ export interface RoomType {
   extraAdultPrice?: number;
   extraChildPrice?: number;
   extraBedPrice?: number;
-  isActive: boolean;
+  totalInventory?: number;
+  amenities?: string[];
+  isActive?: boolean;
   createdAt?: string;
 }
 
@@ -50,7 +52,8 @@ export interface MealPlan {
   includesLunch?: boolean;
   includesDinner?: boolean;
   includesSnacks?: boolean;
-  isActive: boolean;
+  code?: string;
+  isActive?: boolean;
   createdAt?: string;
 }
 
@@ -59,7 +62,7 @@ export interface AdditionalService {
   name: string;
   description?: string;
   unitPrice: number;
-  isActive: boolean;
+  isActive?: boolean;
   createdAt?: string;
 }
 
@@ -84,6 +87,8 @@ export interface Enquiry {
   
   specialRequirements?: string;
   internalNotes?: string;
+  notes?: string;
+  source?: string;
   status?: EnquiryStatus;
   createdAt?: string;
 }
@@ -238,17 +243,22 @@ export interface InvoiceItem {
 export interface Invoice {
   id: string;
   invoiceNo: string;
-  bookingId?: string;
   quotationId?: string;
+  relatedQuotationId?: string;
+  bookingId?: string;
+  guestId?: string;
   clientName: string;
   clientEmail?: string;
   clientMobile?: string;
-  clientPhone?: string;
+  mobile?: string;
+  companyName?: string;
+  address?: string;
   clientAddress?: string;
   billingAddress?: string;
   clientState?: string;
   clientGst?: string;
   clientGstin?: string;
+  clientPhone?: string;
   paymentTerms?: string;
   
   date?: string;
@@ -266,10 +276,12 @@ export interface Invoice {
   totalAmount: number;
   hasGst?: boolean;
   
-  paidAmount: number;
+  paidAmount?: number;
   advanceReceived?: number;
+  advanceAmount?: number;
   balanceAmount: number;
   status: PaymentStatus;
+  discount?: number;
   
   notes?: string;
   terms?: string;
@@ -278,6 +290,7 @@ export interface Invoice {
   disclaimerNote?: string;
   extraNote?: string;
   supplyType?: string;
+  createdAt?: string;
 }
 
 export type ReceiptType = 'Confirmation cum Advance Receipt' | 'Advance Receipt' | 'Full Payment Receipt' | 'Booking Confirmation' | string;
@@ -287,11 +300,14 @@ export interface Receipt {
   receiptNo: string;
   invoiceId?: string;
   bookingId?: string;
+  guestId?: string;
   clientName: string;
   clientMobile?: string;
+  mobile?: string;
   date?: string;
   amount: number;
-  paymentMethod: PaymentMethod;
+  paymentMethod?: PaymentMethod;
+  paymentMode?: string;
   method?: PaymentMethod;
   referenceNo?: string;
   receiptType?: ReceiptType;
@@ -300,6 +316,8 @@ export interface Receipt {
   quotationNo?: string;
   bookingReference?: string;
   stayDetails?: string;
+  guestsCount?: number;
+  createdAt?: string;
   
   grandTotal?: number;
   advancePercent?: number;

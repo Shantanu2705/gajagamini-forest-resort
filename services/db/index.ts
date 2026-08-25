@@ -17,6 +17,7 @@ import {
   Booking,
   Invoice,
   Receipt,
+  RestaurantBill,
   CompanySettings,
   SerialCounters,
 } from '@/types';
@@ -470,6 +471,53 @@ export class HotelDatabase {
     setLocalData('receipts', current.filter((r) => r.id !== id));
   }
 
+  // --- RESTAURANT BILLS ---
+  static async getRestaurantBills(): Promise<RestaurantBill[]> {
+    if (isFirebaseConfigured() && db) {
+      try {
+        const snap = await getDocs(collection(db, 'restaurantBills'));
+        if (!snap.empty) return snap.docs.map((d) => ({ id: d.id, ...d.data() } as RestaurantBill));
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    return getLocalData<RestaurantBill[]>('restaurantBills', []);
+  }
+
+  static async upsertRestaurantBill(bill: RestaurantBill): Promise<RestaurantBill> {
+    const id = bill.id || `rb-${Date.now()}`;
+    const newBill = { ...bill, id, updatedAt: new Date().toISOString() };
+    if (!newBill.createdAt) newBill.createdAt = new Date().toISOString();
+    
+    if (isFirebaseConfigured() && db) {
+      try {
+        await setDoc(doc(db, 'restaurantBills', id), newBill);
+        return newBill;
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    const current = getLocalData<RestaurantBill[]>('restaurantBills', []);
+    const index = current.findIndex((b) => b.id === id);
+    if (index >= 0) current[index] = newBill;
+    else current.unshift(newBill);
+    setLocalData('restaurantBills', current);
+    return newBill;
+  }
+
+  static async deleteRestaurantBill(id: string): Promise<void> {
+    if (isFirebaseConfigured() && db) {
+      try {
+        await deleteDoc(doc(db, 'restaurantBills', id));
+        return;
+      } catch (e) {
+        console.warn('Firestore error:', e);
+      }
+    }
+    const current = getLocalData<RestaurantBill[]>('restaurantBills', []);
+    setLocalData('restaurantBills', current.filter((b) => b.id !== id));
+  }
+
   // --- SETTINGS ---
   static async getSettings(): Promise<CompanySettings> {
     if (isFirebaseConfigured() && db) {
@@ -497,12 +545,13 @@ export class HotelDatabase {
     return updated;
   }
 
-  static async nextSerial(type: 'hotelQuotation' | 'booking' | 'invoice' | 'receipt'): Promise<string> {
+  static async nextSerial(type: 'hotelQuotation' | 'booking' | 'invoice' | 'receipt' | 'restaurantBill'): Promise<string> {
     const current = getLocalData<SerialCounters>('serialCounters', {
       hotelQuotation: { year: 2024, next: 1 },
       booking: { year: 2024, next: 1 },
       invoice: { year: 2024, next: 1 },
       receipt: { year: 2024, next: 1 },
+      restaurantBill: { year: 2024, next: 1 },
     });
     const year = new Date().getFullYear();
     const item = current[type] || { year, next: 1 };
@@ -512,6 +561,7 @@ export class HotelDatabase {
     if (type === 'booking') prefix = 'BK';
     else if (type === 'invoice') prefix = 'INV';
     else if (type === 'receipt') prefix = 'REC';
+    else if (type === 'restaurantBill') prefix = 'REST';
 
     const serialStr = `${prefix}-${year}-${String(validItem.next).padStart(4, '0')}`;
     current[type] = { year, next: validItem.next + 1 };

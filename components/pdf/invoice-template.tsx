@@ -71,6 +71,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
             <div>Phone: {settings?.phone || '+91 98300 12345'}</div>
             <div>Email: {settings?.email || 'contact@gajagamini.com'}</div>
             {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
+            <div className="font-semibold text-slate-700">Registration No. 19AAYPI5879F3ZR</div>
           </div>
         </div>
       </div>
@@ -246,10 +247,10 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
           <strong className="text-slate-800 uppercase tracking-wider text-[11px] mb-1 block">Terms & Conditions:</strong>
           {invoice.disclaimerNote || '1. All payments must be made in full before the due date.\n2. Any disputes are subject to the local jurisdiction.\n3. This is a computer-generated invoice and does not require a physical signature.'}
         </div>
-        <div className="text-center w-64">
-          <div className="border-b-2 border-dashed border-slate-400 pb-12 mb-2 font-bold text-slate-800 uppercase text-[11px] flex flex-col justify-end min-h-[80px]">
+        <div className="text-center w-64 flex flex-col items-center">
+          <div className="mb-2 flex flex-col justify-end items-center min-h-[80px]">
             {/* Stamp/Signature Space */}
-            <span className="text-[10px] text-slate-400 opacity-50 block mt-4 font-normal lowercase italic">(signature & stamp)</span>
+            <img src="/stamp.png" alt="Stamp and Signature" className="h-20 w-auto object-contain mix-blend-multiply" />
           </div>
           <div className="font-extrabold text-slate-800 uppercase text-[11px]">
             For {settings?.companyName || 'Gajagamini Forest Resort'}

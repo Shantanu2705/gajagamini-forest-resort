@@ -38,6 +38,7 @@ export const Sidebar: React.FC<{ className?: string; onCloseMobile?: () => void 
     { title: 'Rooms', href: '/rooms', icon: Building2 },
     { title: 'Meal Plans', href: '/meal-plans', icon: Utensils },
     { title: 'Services', href: '/services', icon: ConciergeBell },
+    { title: 'Restaurant', href: '/restaurant', icon: Utensils },
     { title: 'Quotations', href: '/quotations', icon: FileText },
     { title: 'Billing', href: '/billing', icon: Receipt },
     { title: 'Settings', href: '/settings', icon: Settings },

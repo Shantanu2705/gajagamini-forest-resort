@@ -344,6 +344,46 @@ export interface Receipt {
 }
 
 // ----------------------------------------------------
+// RESTAURANT BILL
+// ----------------------------------------------------
+export interface RestaurantBillItem {
+  id?: string;
+  name: string;
+  category?: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+export interface RestaurantBill {
+  id: string;
+  billNo: string;
+  date: string;
+  
+  guestName?: string;
+  tableNo?: string;
+  roomNo?: string;
+  mobile?: string;
+  
+  items: RestaurantBillItem[];
+  
+  subtotal: number;
+  discountPercent?: number;
+  discountAmount?: number;
+  gstPercent: number;
+  gstAmount: number;
+  roundOff?: number;
+  grandTotal: number;
+  
+  status: 'paid' | 'unpaid' | 'cancelled' | string;
+  paymentMethod?: string;
+  notes?: string;
+  
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ----------------------------------------------------
 // UTILS
 // ----------------------------------------------------
 export interface SerialCounterItem {
@@ -356,6 +396,7 @@ export interface SerialCounters {
   booking: SerialCounterItem;
   invoice: SerialCounterItem;
   receipt: SerialCounterItem;
+  restaurantBill: SerialCounterItem;
 }
 
 export interface CompanySettings {

@@ -62,6 +62,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
           <div className="text-sm">Phone: {companyContact} | Email: {companyEmail}</div>
           <div className="text-sm">Web: {website}</div>
           {settings?.gstin && <div className="text-sm font-semibold">GSTIN: {gstin}</div>}
+          <div className="text-sm font-semibold">Registration No. 19AAYPI5879F3ZR</div>
         </div>
       </div>
 
@@ -252,6 +253,14 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
         </div>
       )}
       
+      {/* Authorized Signatory */}
+      <div className="mt-8 flex justify-end">
+        <div className="text-center flex flex-col items-center">
+          <img src="/stamp.png" alt="Company Stamp and Signature" className="h-24 w-24 object-contain mix-blend-multiply" />
+          <div className="font-bold text-sm mt-2">Authorized Signatory</div>
+        </div>
+      </div>
+
       {/* Footer Details */}
       <div className="mt-12 text-center text-sm font-semibold text-primary pt-4 border-t border-gray-300">
         Thank you for choosing Gajagamini Forest Resort! We look forward to hosting you.

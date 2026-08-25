@@ -38,9 +38,6 @@ function SettingsContent() {
   const [upiId, setUpiId] = useState('gajagamini@sbi');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   
-  // Appearance
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
   // Credentials
   const [adminFullName, setAdminFullName] = useState('Rajiv Pradhan');
   const [adminEmail, setAdminEmail] = useState('admin@gajagamini.com');
@@ -300,25 +297,6 @@ function SettingsContent() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* 5. Appearance */}
-        <div className="bg-white rounded-3xl p-8 shadow-sm">
-          <h2 className="text-[15px] font-bold text-gray-900 mb-6">Appearance</h2>
-          <div className="flex items-center bg-gray-100 p-1 rounded-full w-fit">
-            <button 
-              onClick={() => setTheme('light')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full text-[13px] font-semibold transition-colors ${theme === 'light' ? 'bg-yellow-400 text-yellow-950 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              <span className="text-lg">☀️</span> Light
-            </button>
-            <button 
-              onClick={() => setTheme('dark')}
-              className={`flex items-center gap-2 px-6 py-2 rounded-full text-[13px] font-semibold transition-colors ${theme === 'dark' ? 'bg-gray-800 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              <span className="text-lg">🌙</span> Dark
-            </button>
           </div>
         </div>
 

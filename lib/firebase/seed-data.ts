@@ -100,4 +100,5 @@ export const initialSerialCounters: SerialCounters = {
   booking: { year: new Date().getFullYear(), next: 1 },
   invoice: { year: new Date().getFullYear(), next: 1 },
   receipt: { year: new Date().getFullYear(), next: 1 },
+  restaurantBill: { year: new Date().getFullYear(), next: 1 },
 };

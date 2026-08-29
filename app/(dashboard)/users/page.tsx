@@ -30,7 +30,7 @@ function UsersHubContent() {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState<UserRole>('operator');
-  const [password, setPassword] = useState('Welcome@2026');
+  const [password, setPassword] = useState('');
 
   const isAdmin = currentUser?.role === 'admin';
 
@@ -38,7 +38,7 @@ function UsersHubContent() {
     setEmail('');
     setName('');
     setRole('operator');
-    setPassword('Welcome@2026');
+    setPassword('');
     setIsModalOpen(true);
   };
 

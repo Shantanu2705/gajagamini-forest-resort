@@ -65,6 +65,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       <div className="flex flex-1 flex-col md:pl-64 min-w-0">
         <Header onOpenMobileSidebar={() => setMobileSidebarOpen(true)} />
         <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+        
+        {/* Footer */}
+        <footer className="mt-auto py-4 px-4 md:px-6 lg:px-8 border-t bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm">
+          <p className="text-center text-sm text-muted-foreground font-medium">
+            Designed by{' '}
+            <a 
+              href="https://www.digitaldictionary.in" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary/80 transition-colors duration-200 underline-offset-4 hover:underline"
+            >
+              Digital Dictionary
+            </a>
+          </p>
+        </footer>
       </div>
     </div>
   );

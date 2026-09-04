@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Search, Edit, Trash2, FileText, Download } from 'lucide-react';
+import { PlusCircle, Search, Edit, Trash2, FileText, Download, MessageCircle } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatDate } from '@/utils/formatters';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
@@ -29,6 +29,11 @@ export default function QuotationsHub() {
     if (confirm('Are you sure you want to delete this quotation?')) {
       await deleteQuotation(id);
     }
+  };
+
+  const handleWhatsApp = (docNo: string) => {
+    const text = encodeURIComponent(`Hello, here is your quotation: ${docNo}`);
+    window.open(`https://wa.me/916292114000?text=${text}`, '_blank');
   };
 
   const filtered = hotelQuotations.filter(q => 
@@ -101,6 +106,9 @@ export default function QuotationsHub() {
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => setPreviewQuotation(quotation)}>
                           <FileText className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleWhatsApp(quotation.quotationNo)} className="text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" title="Send via WhatsApp">
+                          <MessageCircle className="h-4 w-4" />
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => router.push(`/quotations/new?editId=${quotation.id}`)}>
                           <Edit className="h-4 w-4" />

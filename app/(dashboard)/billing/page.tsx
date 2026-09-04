@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { formatCurrency, formatDate } from '@/utils/formatters';
-import { Search, Plus, FileText, Receipt as ReceiptIcon, Trash2 } from 'lucide-react';
+import { Search, Plus, FileText, Receipt as ReceiptIcon, Trash2, MessageCircle } from 'lucide-react';
 
 function BillingHubInner() {
   const router = useRouter();
@@ -19,6 +19,12 @@ function BillingHubInner() {
   const tabParam = searchParams.get('tab') as 'quotations' | 'receipts' | 'invoices';
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleWhatsApp = (e: React.MouseEvent, docNo: string) => {
+    e.stopPropagation();
+    const text = encodeURIComponent(`Hello, here is your document: ${docNo}`);
+    window.open(`https://wa.me/916292114000?text=${text}`, '_blank');
+  };
 
   const confirmedQuotations = hotelQuotations.filter(q => (q.status || '').toLowerCase() === 'confirmed');
   const confirmedBookings = bookings.filter(b => (b.status || '').toLowerCase() === 'confirmed');
@@ -179,6 +185,14 @@ function BillingHubInner() {
                               <FileText className="w-3.5 h-3.5 mr-1.5" /> GST Invoice
                             </Button>
                           )}
+                          <Button 
+                            onClick={(e) => handleWhatsApp(e, q.quotationNo)}
+                            size="sm" 
+                            className="h-8 w-8 p-0 rounded-full text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-0 shadow-none flex-shrink-0"
+                            title="Send via WhatsApp"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -216,6 +230,14 @@ function BillingHubInner() {
                           className="h-8 rounded-full text-[12px] font-bold text-yellow-950 bg-yellow-400 hover:bg-yellow-500 border-0 shadow-none"
                         >
                           <FileText className="w-3.5 h-3.5 mr-1.5" /> Generate invoice
+                        </Button>
+                        <Button 
+                          onClick={(e) => handleWhatsApp(e, b.bookingNo || 'Booking')}
+                          size="sm" 
+                          className="h-8 w-8 ml-2 p-0 rounded-full text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-0 shadow-none flex-shrink-0"
+                          title="Send via WhatsApp"
+                        >
+                          <MessageCircle className="w-4 h-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -288,8 +310,18 @@ function BillingHubInner() {
                         {formatCurrency(balance > 0 ? balance : 0)}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8 rounded-full"
+                            title="Send via WhatsApp"
+                            onClick={(e) => handleWhatsApp(e, r.receiptNo)}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
                           size="icon"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                           onClick={(e) => {
@@ -368,8 +400,18 @@ function BillingHubInner() {
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(inv.totalAmount)}</TableCell>
                       <TableCell className="font-bold text-[13px] text-gray-900">{formatCurrency(inv.balanceAmount)}</TableCell>
                       <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
+                        <div className="flex items-center justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8 rounded-full"
+                            title="Send via WhatsApp"
+                            onClick={(e) => handleWhatsApp(e, inv.invoiceNo)}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
                           size="icon"
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 rounded-full"
                           onClick={(e) => {
@@ -381,6 +423,7 @@ function BillingHubInner() {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

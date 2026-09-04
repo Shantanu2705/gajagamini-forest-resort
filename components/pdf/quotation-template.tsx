@@ -61,8 +61,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
           <div className="text-sm mt-1">{companyAddress}</div>
           <div className="text-sm">Phone: {companyContact} | Email: {companyEmail}</div>
           <div className="text-sm">Web: {website}</div>
-          {settings?.gstin && <div className="text-sm font-semibold">GSTIN: {gstin}</div>}
-          <div className="text-sm font-semibold">Registration No. 19AAYPI5879F3ZR</div>
+          <div className="text-sm font-semibold">GSTIN: {gstin || '19AAYPI5879F3ZR'}</div>
         </div>
       </div>
 

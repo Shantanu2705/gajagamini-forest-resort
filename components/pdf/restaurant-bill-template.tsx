@@ -45,8 +45,7 @@ export const RestaurantBillPdfTemplate: React.FC<RestaurantBillPdfTemplateProps>
             <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
               <div>Phone: {settings?.phone || '+91 9830712000'}</div>
               <div>Email: {settings?.email || 'gajagaminilataguri@gmail.com'}</div>
-              {settings?.gstin && <div>GSTIN: {settings?.gstin}</div>}
-              <div className="font-semibold text-slate-700">Registration No. 19AAYPI5879F3ZR</div>
+              <div className="font-semibold text-slate-700">GSTIN: {settings?.gstin || '19AAYPI5879F3ZR'}</div>
             </div>
           </div>
         </div>

@@ -34,7 +34,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
   const companyAddress = settings?.address || 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219';
   const companyContact = settings?.phone || '+91 9830712000';
   const companyEmail = settings?.email || 'gajagaminilataguri@gmail.com';
-  const gstin = settings?.gstin || 'XXXXXXXXXXXXXXX';
+  const gstin = settings?.gstin || '19AAYPI5879F3ZR';
   const website = settings?.website || 'www.gajagaminiresort.com';
 
   return (

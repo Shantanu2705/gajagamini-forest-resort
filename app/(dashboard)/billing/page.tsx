@@ -20,10 +20,20 @@ function BillingHubInner() {
   const [activeTab, setActiveTab] = useState<'quotations' | 'receipts' | 'invoices'>(tabParam || 'quotations');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleWhatsApp = (e: React.MouseEvent, docNo: string) => {
+  const handleWhatsApp = (e: React.MouseEvent, doc: any, type: 'quotation' | 'booking' | 'receipt' | 'invoice') => {
     e.stopPropagation();
-    const text = encodeURIComponent(`Hello, here is your document: ${docNo}`);
-    window.open(`https://wa.me/916292114000?text=${text}`, '_blank');
+    let text = '';
+    if (type === 'quotation') {
+      text = `*GAJAGAMINI FOREST RESORT - QUOTATION*\n*Quotation No:* ${doc.quotationNo}\n*Guest:* ${doc.guestName}\n*Dates:* ${doc.checkIn ? formatDate(doc.checkIn) : '-'} to ${doc.checkOut ? formatDate(doc.checkOut) : '-'}\n*Total Amount:* ₹${(doc.grandTotal || 0).toLocaleString()}\n*Advance Required:* ₹${(doc.advanceAmount || 0).toLocaleString()}\n\nPlease reply to confirm your booking!`;
+    } else if (type === 'booking') {
+      text = `*GAJAGAMINI FOREST RESORT - BOOKING*\n*Booking No:* ${doc.bookingNo || 'N/A'}\n*Guest:* ${doc.clientName}\n*Dates:* ${doc.checkIn ? formatDate(doc.checkIn) : '-'} to ${doc.checkOut ? formatDate(doc.checkOut) : '-'}\n*Total Amount:* ₹${(doc.amount || 0).toLocaleString()}\n\nThank you for booking with us!`;
+    } else if (type === 'receipt') {
+      const received = Number(doc.amount) || Number(doc.receivedAmount) || 0;
+      text = `*GAJAGAMINI FOREST RESORT - PAYMENT RECEIPT*\n*Receipt No:* ${doc.receiptNo}\n*Guest:* ${doc.clientName}\n*Date:* ${doc.date ? formatDate(doc.date.split('T')[0]) : '-'}\n*Amount Received:* ₹${received.toLocaleString()}\n*Mode:* ${doc.paymentMethod || doc.method || 'UPI'}\n\nThank you for your payment!`;
+    } else if (type === 'invoice') {
+      text = `*GAJAGAMINI FOREST RESORT - INVOICE*\n*Invoice No:* ${doc.invoiceNo}\n*Guest:* ${doc.clientName}\n*Date:* ${doc.issueDate ? formatDate(doc.issueDate.split('T')[0]) : '-'}\n*Total Amount:* ₹${(doc.totalAmount || 0).toLocaleString()}\n*Balance Due:* ₹${(doc.balanceAmount || 0).toLocaleString()}\n\nThank you for your visit!`;
+    }
+    window.open(`https://wa.me/916292114000?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const confirmedQuotations = hotelQuotations.filter(q => (q.status || '').toLowerCase() === 'confirmed');
@@ -186,7 +196,7 @@ function BillingHubInner() {
                             </Button>
                           )}
                           <Button 
-                            onClick={(e) => handleWhatsApp(e, q.quotationNo)}
+                            onClick={(e) => handleWhatsApp(e, q, 'quotation')}
                             size="sm" 
                             className="h-8 w-8 p-0 rounded-full text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-0 shadow-none flex-shrink-0"
                             title="Send via WhatsApp"
@@ -232,7 +242,7 @@ function BillingHubInner() {
                           <FileText className="w-3.5 h-3.5 mr-1.5" /> Generate invoice
                         </Button>
                         <Button 
-                          onClick={(e) => handleWhatsApp(e, b.bookingNo || 'Booking')}
+                          onClick={(e) => handleWhatsApp(e, b, 'booking')}
                           size="sm" 
                           className="h-8 w-8 ml-2 p-0 rounded-full text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border-0 shadow-none flex-shrink-0"
                           title="Send via WhatsApp"
@@ -316,7 +326,7 @@ function BillingHubInner() {
                             size="icon"
                             className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8 rounded-full"
                             title="Send via WhatsApp"
-                            onClick={(e) => handleWhatsApp(e, r.receiptNo)}
+                            onClick={(e) => handleWhatsApp(e, r, 'receipt')}
                           >
                             <MessageCircle className="h-4 w-4" />
                           </Button>
@@ -407,7 +417,7 @@ function BillingHubInner() {
                             size="icon"
                             className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 w-8 rounded-full"
                             title="Send via WhatsApp"
-                            onClick={(e) => handleWhatsApp(e, inv.invoiceNo)}
+                            onClick={(e) => handleWhatsApp(e, inv, 'invoice')}
                           >
                             <MessageCircle className="h-4 w-4" />
                           </Button>

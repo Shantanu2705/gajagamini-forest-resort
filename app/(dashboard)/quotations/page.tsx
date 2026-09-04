@@ -31,9 +31,18 @@ export default function QuotationsHub() {
     }
   };
 
-  const handleWhatsApp = (docNo: string) => {
-    const text = encodeURIComponent(`Hello, here is your quotation: ${docNo}`);
-    window.open(`https://wa.me/916292114000?text=${text}`, '_blank');
+  const handleWhatsApp = (q: HotelQuotation) => {
+    const text = `*GAJAGAMINI FOREST RESORT - QUOTATION*
+*Quotation No:* ${q.quotationNo}
+*Guest:* ${q.guestName}
+*Dates:* ${formatDate(q.checkIn)} to ${formatDate(q.checkOut)} (${q.nights} Nights)
+*Rooms:* ${q.rooms.map(r => `${r.quantity}x ${r.roomType}`).join(', ')}
+*Total Amount:* ₹${q.grandTotal.toLocaleString()}
+*Advance Required:* ₹${q.advanceAmount.toLocaleString()}
+
+Please reply to this message to confirm your booking!`;
+    const encodedText = encodeURIComponent(text);
+    window.open(`https://wa.me/916292114000?text=${encodedText}`, '_blank');
   };
 
   const filtered = hotelQuotations.filter(q => 
@@ -107,7 +116,7 @@ export default function QuotationsHub() {
                         <Button variant="outline" size="sm" onClick={() => setPreviewQuotation(quotation)}>
                           <FileText className="h-4 w-4 text-blue-600" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleWhatsApp(quotation.quotationNo)} className="text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" title="Send via WhatsApp">
+                        <Button variant="outline" size="sm" onClick={() => handleWhatsApp(quotation)} className="text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" title="Send via WhatsApp">
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => router.push(`/quotations/new?editId=${quotation.id}`)}>

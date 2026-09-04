@@ -36,7 +36,7 @@ export default function QuotationsHub() {
 *Quotation No:* ${q.quotationNo}
 *Guest:* ${q.guestName}
 *Dates:* ${formatDate(q.checkIn)} to ${formatDate(q.checkOut)} (${q.nights} Nights)
-*Rooms:* ${q.rooms.map(r => `${r.quantity}x ${r.roomType}`).join(', ')}
+*Rooms:* ${q.rooms.map(r => `${r.numberOfRooms}x ${r.roomName}`).join(', ')}
 *Total Amount:* ₹${q.grandTotal.toLocaleString()}
 *Advance Required:* ₹${q.advanceAmount.toLocaleString()}
 

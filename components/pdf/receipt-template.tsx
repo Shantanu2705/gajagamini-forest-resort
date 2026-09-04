@@ -40,7 +40,7 @@ export const ReceiptPdfTemplate: React.FC<ReceiptPdfTemplateProps> = ({ receipt,
             {settings?.companyName || 'Gajagamini Forest Resort'}
           </h2>
           <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
-            {settings?.address || 'MG Marg, Gangtok, Sikkim — 737101'}
+            {settings?.address || 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219'}
           </p>
           <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || '+91 98300 12345'}</div>

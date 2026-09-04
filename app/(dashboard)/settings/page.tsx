@@ -20,6 +20,7 @@ function SettingsContent() {
   const [whatsappNumber, setWhatsappNumber] = useState('+91 9830712000');
   const [invoicePrefix, setInvoicePrefix] = useState('GFR');
   const [gstPercent, setGstPercent] = useState('5');
+  const [address, setAddress] = useState('Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219');
   
   // Logos
   const [logoUrl, setLogoUrl] = useState('');
@@ -54,6 +55,8 @@ function SettingsContent() {
       if (settings.whatsappNumber) setWhatsappNumber(settings.whatsappNumber);
       if (settings.invoicePrefix) setInvoicePrefix(settings.invoicePrefix);
       if (settings.gstPercent !== undefined) setGstPercent(settings.gstPercent.toString());
+      if (settings.address) setAddress(settings.address);
+      else if (settings.companyAddress) setAddress(settings.companyAddress);
       if (settings.logoUrl) setLogoUrl(settings.logoUrl);
       if (settings.headerLogoUrl) setHeaderLogoUrl(settings.headerLogoUrl);
       if (settings.footerLogoUrl) setFooterLogoUrl(settings.footerLogoUrl);
@@ -80,6 +83,8 @@ function SettingsContent() {
       whatsappNumber,
       invoicePrefix,
       gstPercent: Number(gstPercent),
+      address,
+      companyAddress: address,
       logoUrl,
       headerLogoUrl,
       footerLogoUrl,
@@ -173,7 +178,11 @@ function SettingsContent() {
               <Label className="text-[12px] text-gray-600 font-medium">GST %</Label>
               <Input value={gstPercent} onChange={e => setGstPercent(e.target.value)} className="h-10 rounded-xl border-gray-200 text-[14px]" />
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-[12px] text-gray-600 font-medium">Company Address</Label>
+              <Textarea value={address} onChange={e => setAddress(e.target.value)} className="min-h-[80px] rounded-xl border-gray-200 text-[14px] resize-y" />
+            </div>
+            <div className="space-y-1.5 md:col-span-2">
               <Label className="text-[12px] text-gray-600 font-medium">Company logo</Label>
               <div className="flex items-center gap-4 p-2 border border-dashed border-gray-300 rounded-xl">
                 <div className="w-16 h-10 bg-gray-50 rounded flex items-center justify-center overflow-hidden">

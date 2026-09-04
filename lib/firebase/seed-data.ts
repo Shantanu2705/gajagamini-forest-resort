@@ -90,7 +90,7 @@ export const initialSettings: CompanySettings = {
   qrCodeUrl: '',
   companyGstin: '',
   companyState: 'West Bengal',
-  companyAddress: 'Jalpaiguri, West Bengal, India',
+  companyAddress: 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219',
   companyPan: '',
   cancellationPolicy: ``
 };

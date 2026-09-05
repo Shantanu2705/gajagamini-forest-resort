@@ -31,8 +31,8 @@ function numberToWords(num: number): string {
 
 export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quotation, settings }) => {
   const companyName = settings?.companyName || 'Gajagamini Forest Resort';
-  const companyAddress = settings?.address || 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219';
-  const companyContact = settings?.phone || '+91 9830712000';
+  const companyAddress = settings?.address || 'Opposit Bichabhanga Range Office, Near Gorumara National Park Lataguri, Nimna Tandu Forest, West Bengal - 735219';
+  const companyContact = settings?.phone || '+91 9830712000 / +91 6292114000';
   const companyEmail = settings?.email || 'gajagaminilataguri@gmail.com';
   const gstin = settings?.gstin || '19AAYPI5879F3ZR';
   const website = settings?.website || 'www.gajagaminiresort.com';

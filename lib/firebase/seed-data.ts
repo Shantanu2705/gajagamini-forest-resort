@@ -79,8 +79,8 @@ export const initialSettings: CompanySettings = {
   gstPercent: 18,
   invoicePrefix: 'HQ',
   terms: '1. Standard check-in time is 12:00 PM and check-out time is 11:00 AM.\n2. Valid ID proof is mandatory at the time of check-in.',
-  supportEmail: 'contact@gajagamini.com',
-  whatsappNumber: '919876543210',
+  supportEmail: 'gajagaminilataguri@gmail.com',
+  whatsappNumber: '+91 9830712000 / +91 6292114000',
   bankName: '',
   accountName: '',
   accountNumber: '',
@@ -90,7 +90,7 @@ export const initialSettings: CompanySettings = {
   qrCodeUrl: '',
   companyGstin: '',
   companyState: 'West Bengal',
-  companyAddress: 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219',
+  companyAddress: 'Opposit Bichabhanga Range Office, Near Gorumara National Park Lataguri, Nimna Tandu Forest, West Bengal - 735219',
   companyPan: '',
   cancellationPolicy: ``
 };

@@ -31,10 +31,7 @@ export default function NewRestaurantBill() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New Item selection state
-  const [selectedCategory, setSelectedCategory] = useState<string>(MENU_CATEGORIES[0]);
   const [selectedItemId, setSelectedItemId] = useState<string>('');
-
-  const filteredMenuItems = RESTAURANT_MENU.filter(item => item.category === selectedCategory);
 
   const handleAddItemFromMenu = () => {
     if (!selectedItemId) return;
@@ -166,31 +163,22 @@ export default function NewRestaurantBill() {
             <CardContent>
               {/* Menu Selection Area */}
               <div className="bg-slate-50 p-4 rounded-md border mb-6 flex flex-wrap gap-4 items-end">
-                <div className="space-y-2 flex-1 min-w-[200px]">
-                  <Label>Category</Label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                    value={selectedCategory}
-                    onChange={(e) => {
-                      setSelectedCategory(e.target.value);
-                      setSelectedItemId('');
-                    }}
-                  >
-                    {MENU_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
                 <div className="space-y-2 flex-[2] min-w-[250px]">
-                  <Label>Item</Label>
+                  <Label>Search & Select Item</Label>
                   <select 
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                     value={selectedItemId}
                     onChange={(e) => setSelectedItemId(e.target.value)}
                   >
-                    <option value="">Select an item...</option>
-                    {filteredMenuItems.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.name} - ₹{item.price}
-                      </option>
+                    <option value="">Select an item from any category...</option>
+                    {MENU_CATEGORIES.map(category => (
+                      <optgroup key={category} label={category}>
+                        {RESTAURANT_MENU.filter(item => item.category === category).map(item => (
+                          <option key={item.id} value={item.id}>
+                            {item.name} - ₹{item.price}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                 </div>

@@ -40,10 +40,10 @@ export const RestaurantBillPdfTemplate: React.FC<RestaurantBillPdfTemplateProps>
               {settings?.companyName || 'Gajagamini Forest Resort'}
             </h2>
             <p className="text-[11px] text-slate-600 mt-1 max-w-[200px] leading-snug">
-              {settings?.address || 'Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219'}
+              {settings?.address || 'Opposit Bichabhanga Range Office, Near Gorumara National Park Lataguri, Nimna Tandu Forest, West Bengal - 735219'}
             </p>
             <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
-              <div>Phone: {settings?.phone || '+91 9830712000'}</div>
+              <div>Phone: {settings?.phone || '+91 9830712000 / +91 6292114000'}</div>
               <div>Email: {settings?.email || 'gajagaminilataguri@gmail.com'}</div>
               <div className="font-semibold text-slate-700">GSTIN: {settings?.gstin || '19AAYPI5879F3ZR'}</div>
             </div>

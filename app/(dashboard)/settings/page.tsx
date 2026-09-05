@@ -17,10 +17,10 @@ function SettingsContent() {
   // Settings State
   const [companyName, setCompanyName] = useState('Gajagamini Forest Resort');
   const [supportEmail, setSupportEmail] = useState('gajagaminilataguri@gmail.com');
-  const [whatsappNumber, setWhatsappNumber] = useState('+91 9830712000');
+  const [whatsappNumber, setWhatsappNumber] = useState('+91 9830712000 / +91 6292114000');
   const [invoicePrefix, setInvoicePrefix] = useState('GFR');
   const [gstPercent, setGstPercent] = useState('5');
-  const [address, setAddress] = useState('Lataguri, Bichabhanga Village, Opposite 1 No. Range Office, West Bengal, 735219');
+  const [address, setAddress] = useState('Opposit Bichabhanga Range Office, Near Gorumara National Park Lataguri, Nimna Tandu Forest, West Bengal - 735219');
   
   // Logos
   const [logoUrl, setLogoUrl] = useState('');

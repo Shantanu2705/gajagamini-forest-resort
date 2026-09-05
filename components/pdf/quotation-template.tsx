@@ -33,7 +33,7 @@ export const QuotationPdfTemplate: React.FC<QuotationPdfTemplateProps> = ({ quot
   const companyName = settings?.companyName || 'Gajagamini Forest Resort';
   const companyAddress = settings?.address || 'Opposit Bichabhanga Range Office, Near Gorumara National Park Lataguri, Nimna Tandu Forest, West Bengal - 735219';
   const companyContact = settings?.phone || '+91 9830712000 / +91 6292114000';
-  const companyEmail = settings?.email || 'gajagaminilataguri@gmail.com';
+  const companyEmail = settings?.email === 'contact@gajagamini.com' ? 'gajagaminilataguri@gmail.com' : (settings?.email || 'gajagaminilataguri@gmail.com');
   const gstin = settings?.gstin || '19AAYPI5879F3ZR';
   const website = settings?.website || 'www.gajagaminiresort.com';
 

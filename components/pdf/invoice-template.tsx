@@ -69,7 +69,7 @@ export const InvoicePdfTemplate: React.FC<InvoicePdfTemplateProps> = ({ invoice,
           </p>
           <div className="mt-2 text-[10px] font-mono space-y-0.5 text-slate-500">
             <div>Phone: {settings?.phone || '+91 98300 12345 / +91 6292114000'}</div>
-            <div>Email: {settings?.email || 'gajagaminilataguri@gmail.com'}</div>
+            <div>Email: {settings?.email === 'contact@gajagamini.com' ? 'gajagaminilataguri@gmail.com' : (settings?.email || 'gajagaminilataguri@gmail.com')}</div>
             <div className="font-semibold text-slate-700">GSTIN: {settings?.gstin || '19AAYPI5879F3ZR'}</div>
           </div>
         </div>

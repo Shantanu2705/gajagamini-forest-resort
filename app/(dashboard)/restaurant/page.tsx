@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Search, Edit, Trash2, FileText, Utensils } from 'lucide-react';
+import { PlusCircle, Search, Edit, Trash2, FileText, Utensils, MessageCircle } from 'lucide-react';
 import { formatDate, formatCurrency } from '@/utils/formatters';
 import { PdfPreviewModal } from '@/components/shared/pdf-preview-modal';
 import { RestaurantBillPdfTemplate } from '@/components/pdf/restaurant-bill-template';
@@ -35,6 +35,19 @@ export default function RestaurantBillsHub() {
     (b.guestName && b.guestName.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (b.tableNo && b.tableNo.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleWhatsApp = (bill: RestaurantBill) => {
+    const text = `*GAJAGAMINI FOREST RESORT - RESTAURANT BILL*
+*Bill No:* ${bill.billNo}
+*Date:* ${formatDate(bill.date)}
+*Guest:* ${bill.guestName || 'Walk-in'}
+*Table:* ${bill.tableNo || 'N/A'}
+*Amount:* ₹${bill.grandTotal.toLocaleString()}
+
+Thank you for dining with us!`;
+    const encodedText = encodeURIComponent(text);
+    window.open(`https://wa.me/916292114000?text=${encodedText}`, '_blank');
+  };
 
   return (
     <DashboardLayout>
@@ -102,6 +115,9 @@ export default function RestaurantBillsHub() {
                     <TableCell className="font-semibold text-primary">{formatCurrency(bill.grandTotal)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleWhatsApp(bill)} className="text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" title="Send via WhatsApp">
+                          <MessageCircle className="h-4 w-4" />
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setPreviewBill(bill)}>
                           <FileText className="h-4 w-4 text-blue-600" />
                         </Button>
